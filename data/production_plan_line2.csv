@@ -1,0 +1,20 @@
+day,sequence,variant,drive,packaging,quantity,shift
+Tue,1,56 N2,AWD,Steel rack,550,D
+Wed,1,INV D3.6,,Steel rack,220,D+N
+Wed,2,56 C2,FWD,Steel rack,160,D+N
+Wed,3,56 M2,FWD,Steel rack,140,D+N
+Wed,4,56 N2,AWD,Steel rack,330,D+N
+Wed,5,46 N2,LSD-AWD,Steel rack,210,D+N
+Thu,1,46 N2,LSD-AWD,Steel rack,130,N
+Thu,2,56 N2,AWD,Steel rack,100,N
+Thu,3,56 C2,AWD,Steel rack,190,N
+Thu,4,56 H2,FWD,Steel rack,130,N
+Sat,1,56 H2,FWD,Steel rack,120,D
+Sat,2,56 M2,FWD,Steel rack,130,D
+Sat,3,56 H2,FWD,Steel rack,100,D
+Sat,4,56 N2,AWD,Steel rack,100,D
+Sat,5,46 N2,LSD-AWD,Steel rack,60,D
+Sun,1,46 N2,LSD-AWD,Carton,30,D+N
+Sun,2,46 N2,LSD-AWD,Steel rack,230,D+N
+Sun,3,56 N2,AWD,Carton,60,D+N
+Sun,4,56 N2,AWD,Steel rack,620,D+N
