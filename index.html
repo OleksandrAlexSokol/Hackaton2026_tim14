@@ -1,0 +1,963 @@
+<title>Line 2 Supermarket</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: control-room console. Summary first (scenario comparison, KPIs), then timeline, live layout, then calculation tables. One column, max 1280px. */
+:root{
+  --bg:#eceff2; --surface:#ffffff; --surface-2:#f5f6f8; --ink:#15181d; --muted:#5a6271; --line:#d5dae1; --grid:#e6e9ee;
+  --accent:#f2b705; --accent-ink:#7a5800; --accent-soft:#fff4cc;
+  --ok:#2e7d4f; --warn:#b7791f; --crit:#c0392b; --crit-soft:#fbe5e2; --ok-soft:#e1f2e8; --warn-soft:#fbefd9;
+  --c56:#3b4250; --c46:#9a5b2e; --c35:#6d4aa8; --c34:#2f6fb3; --c55:#d19a10; --cxx:#c2417e;
+  --cC2:#2a9d8f; --cH2:#5d6878; --cM2:#a1892a; --cN2:#b0407e; --cInv:#9aa0aa;
+  --v56C2:#2a9d8f; --v56H2:#5d6878; --v56M2:#a1892a; --v56N2:#2f6fb3; --v46N2:#9a5b2e; --v55N2:#d19a10;
+  --font-display:"Barlow Semi Condensed","Arial Narrow",Arial,sans-serif;
+  --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --r:6px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#101317; --surface:#181c22; --surface-2:#1e232a; --ink:#e7eaee; --muted:#99a1ae; --line:#2c333c; --grid:#242a32;
+  --accent:#f5c22b; --accent-ink:#f5c22b; --accent-soft:#3a3115;
+  --ok:#4fb57a; --warn:#e0a640; --crit:#ef6a5b; --crit-soft:#3d2220; --ok-soft:#1c3226; --warn-soft:#382c17;
+  --c56:#8a94a5; --cH2:#8d97a6; --v56H2:#8d97a6; --c34:#4f8fd6; --v56N2:#4f8fd6; --c35:#9277cf; --cInv:#6d737d;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101317; --surface:#181c22; --surface-2:#1e232a; --ink:#e7eaee; --muted:#99a1ae; --line:#2c333c; --grid:#242a32;
+  --accent:#f5c22b; --accent-ink:#f5c22b; --accent-soft:#3a3115;
+  --ok:#4fb57a; --warn:#e0a640; --crit:#ef6a5b; --crit-soft:#3d2220; --ok-soft:#1c3226; --warn-soft:#382c17;
+  --c56:#8a94a5; --cH2:#8d97a6; --v56H2:#8d97a6; --c34:#4f8fd6; --v56N2:#4f8fd6; --c35:#9277cf; --cInv:#6d737d;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:14px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+.wrap{max-width:1280px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1,h2,h3{font-family:var(--font-display);font-weight:600;letter-spacing:.01em;text-wrap:balance;margin:0}
+h1{font-size:2.1rem;line-height:1.1}
+h2{font-size:1.35rem}
+h3{font-size:1.05rem}
+p{margin:0}
+.num,td.n,th.n{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.eyebrow{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600}
+header.top{padding-block:28px 4px;display:flex;flex-wrap:wrap;gap:12px 32px;align-items:flex-end;justify-content:space-between}
+header.top .sig{display:flex;gap:10px;align-items:center}
+.stripe{width:10px;height:44px;background:var(--accent);border-radius:2px}
+.src{font-size:.8rem;color:var(--muted);max-width:52ch}
+section.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel-head{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:baseline;justify-content:space-between}
+.panel-head p{max-width:75ch}
+.scroll{overflow-x:auto;min-width:0}
+table{border-collapse:collapse;width:100%;font-size:.84rem}
+th,td{padding:6px 8px;border-bottom:1px solid var(--grid);text-align:left;white-space:nowrap;vertical-align:middle}
+th{font-weight:600;color:var(--muted);font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;background:var(--surface-2);position:sticky;top:0}
+td.n,th.n{text-align:right}
+tr.sel td{background:var(--accent-soft)}
+tbody tr:hover td{background:var(--surface-2)}
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+button,.btn{font:inherit;font-size:.85rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:5px;padding:6px 11px;cursor:pointer}
+button:hover{border-color:var(--muted)}
+button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input,select{font:inherit;font-size:.85rem;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:4px 6px}
+input[type=number]{width:74px;font-family:var(--font-mono)}
+.params{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px 18px}
+.params label{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.82rem;color:var(--muted)}
+details>summary{cursor:pointer;font-weight:600;font-size:.88rem}
+details[open]>summary{margin-bottom:12px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.kpi{border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;background:var(--surface-2);display:flex;flex-direction:column;gap:2px;min-width:0}
+.kpi .v{font-family:var(--font-mono);font-size:1.45rem;font-weight:500;font-variant-numeric:tabular-nums}
+.kpi .l{font-size:.75rem;color:var(--muted)}
+.kpi.good{border-left:4px solid var(--ok)} .kpi.bad{border-left:4px solid var(--crit)} .kpi.mid{border-left:4px solid var(--warn)}
+.pill{display:inline-block;padding:1px 7px;border-radius:999px;font-size:.72rem;font-weight:600;letter-spacing:.02em}
+.p1{background:var(--crit-soft);color:var(--crit)} .p2{background:var(--warn-soft);color:var(--warn)} .p3{background:var(--ok-soft);color:var(--ok)} .p4{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+.t-REPL{background:var(--ok-soft);color:var(--ok)} .t-CO_IN{background:var(--accent-soft);color:var(--accent-ink)} .t-RETURN{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+.swatch{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.split{display:grid;grid-template-columns:minmax(0,2.1fr) minmax(0,1fr);gap:16px}
+@media (max-width:900px){.split{grid-template-columns:1fr}}
+.timebar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.timebar input[type=range]{flex:1;min-width:180px;accent-color:var(--accent)}
+.clock{font-family:var(--font-mono);font-size:1.05rem;min-width:9ch}
+.status{font-size:.85rem;display:flex;flex-direction:column;gap:6px}
+.openlist{display:flex;flex-direction:column;gap:4px;max-height:330px;overflow:auto;font-size:.8rem}
+.openlist div{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:4px 6px;border-radius:4px;background:var(--surface-2)}
+svg text{fill:var(--ink);font-family:var(--font-body)}
+svg .mono{font-family:var(--font-mono)}
+svg .mut{fill:var(--muted)}
+.formula{font-family:var(--font-mono);font-size:.8rem;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;white-space:pre-wrap;overflow-x:auto;line-height:1.65}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.78rem;color:var(--muted)}
+.cols2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+ul.assume{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:6px;max-width:90ch}
+.plan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.day{border:1px solid var(--line);border-radius:var(--r);padding:10px;display:flex;flex-direction:column;gap:6px;background:var(--surface-2)}
+.day .run{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:.82rem}
+.day .run span.k{display:flex;align-items:center;gap:4px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="sig">
+      <div class="stripe" aria-hidden="true"></div>
+      <div>
+        <div class="eyebrow">Magna Hackathon · Zadanie 6 · Inteligentný logistický supermarket</div>
+        <h1>Line 2 Supermarket</h1>
+      </div>
+    </div>
+    <p class="src">Production plan → variant → material demand → Min/Max → štaple → supermarket size → trigger → AMR request → changeover. Data: <span class="num">vyrobny_plan.xlsx</span> (Line 2, shifts), <span class="num">SM_layout_existujuci.xlsx</span> (Prevodník, pcs/štapel, stock, basket size), task AMR parameters${''}.</p>
+  </header>
+
+  <section class="panel" id="scen-panel">
+    <div class="panel-head">
+      <h2>Test scenarios</h2>
+      <p class="muted">Every scenario runs the same data model and a minute-by-minute simulation of the week. Select one to drive all views below.</p>
+    </div>
+    <div class="tabs" id="scen-tabs" role="tablist"></div>
+    <div class="scroll"><table id="scen-table"></table></div>
+    <details id="param-box">
+      <summary>Parameters (known in advance, used for Min/Max and triggers)</summary>
+      <div class="params" id="params"></div>
+    </details>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h2 id="kpi-title">Scenario result</h2><p class="muted" id="kpi-sub"></p></div>
+    <div class="kpis" id="kpis"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Week timeline</h2>
+      <div class="tabs" id="zoom-tabs"></div>
+    </div>
+    <div class="legend" id="gantt-legend"></div>
+    <div class="scroll"><svg id="gantt" viewBox="0 0 1200 200" width="100%" style="min-width:760px;display:block"></svg></div>
+    <p class="muted" style="font-size:.8rem">Click the timeline to move the time cursor. Red = line stop caused by missing material. Hatched = 20 min changeover.</p>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Line 2 supermarket at <span class="clock" id="clock2"></span></h2>
+      <p class="muted">Computed layout. Fill level = pieces left in the štapel. Dashed = pre-staged for the next variant.</p>
+    </div>
+    <div class="timebar">
+      <button id="play" aria-pressed="false">Play</button>
+      <input type="range" id="tslider" min="0" max="11520" step="5" value="2160" aria-label="Simulation time">
+      <span class="clock" id="clock"></span>
+    </div>
+    <div class="split">
+      <div class="scroll"><svg id="layout" viewBox="0 0 1000 470" width="100%" style="min-width:640px;display:block"></svg></div>
+      <div class="status">
+        <div id="line-status"></div>
+        <h3>Open AMR requests</h3>
+        <div class="openlist" id="openlist"></div>
+      </div>
+    </div>
+    <div class="legend" id="mat-legend"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Material flow · existing supermarket → Line 2</h2>
+      <p class="muted">AMR loop from the plant layout (Loop.pptx): out along the lower aisle and the east side, delivery between Assy 1 and Assy 2, back along the west side. Positions at <span class="num" id="clock3"></span>.</p>
+    </div>
+    <div class="split">
+      <div class="scroll"><svg id="flow" viewBox="0 0 900 380" width="100%" style="min-width:560px;display:block"></svg></div>
+      <div class="status" id="flow-side"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Line-side stock and time to stock-out</h2>
+      <label class="muted" style="font-size:.85rem">Consumption point <select id="comp-sel"></select></label>
+    </div>
+    <div class="scroll"><svg id="chart" viewBox="0 0 1200 230" width="100%" style="min-width:640px;display:block"></svg></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Production plan · Line 2</h2>
+      <div class="tabs" id="plan-presets"></div>
+    </div>
+    <p class="muted">Quantities are editable. Roman numerals in the source plan give the sequence within the day. Packaging (Steel rack / Carton) does not change G&amp;S material, so it does not trigger a changeover.</p>
+    <div class="plan-grid" id="plan-grid"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Material calculation · Min / Max / trigger</h2>
+      <p class="muted">One row per material used by the plan on Line 2.</p>
+    </div>
+    <div class="formula" id="formula"></div>
+    <div class="scroll"><table id="mat-table"></table></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h2>Supermarket size</h2><p class="muted">Derived from the stack counts and the simulated peaks of the selected scenario.</p></div>
+    <div class="cols2">
+      <div class="scroll"><table id="size-table"></table></div>
+      <div class="formula" id="size-formula"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Line 2 supermarket by shift</h2>
+      <p class="muted">How the plan and the mix drive what the supermarket holds. Cells = štaple delivered to Line 2 in the shift; shaded = material consumed in the shift.</p>
+    </div>
+    <div class="scroll"><table id="shift-table"></table></div>
+    <p class="muted" style="font-size:.82rem" id="shift-note"></p>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h2>Changeover plan</h2><p class="muted">Logistic changeover only: what is pre-staged, when, and what goes back.</p></div>
+    <div class="scroll"><table id="co-table"></table></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Changeover detail · AMR plan before, during and after</h2>
+      <label class="muted" style="font-size:.85rem">Changeover <select id="co-sel"></select></label>
+    </div>
+    <p class="muted" id="co-summary" style="max-width:none"></p>
+    <div class="scroll"><svg id="co-gantt" viewBox="0 0 1200 300" width="100%" style="min-width:720px;display:block"></svg></div>
+    <div class="scroll" style="max-height:360px;overflow:auto"><table id="co-events"></table></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>AMR transport requests</h2>
+      <div class="tabs" id="req-filter"></div>
+    </div>
+    <div class="scroll" style="max-height:460px;overflow:auto"><table id="req-table"></table></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h2>Prevodník · variant → material</h2><p class="muted">Read from the Prevodník sheet of <span class="num">SM_layout_existujuci.xlsx</span> by <span class="num">model/build_data.py</span>.</p></div>
+    <div class="scroll"><table id="bom-table"></table></div>
+    <p class="muted" style="font-size:.82rem" id="bom-note"></p>
+  </section>
+
+  <section class="panel">
+    <h2>Assumptions, limits and risks</h2>
+    <ul class="assume" id="assume"></ul>
+  </section>
+</div>
+
+<script src="data/input.js"></script>
+<script>
+"use strict";
+/* ---------------- DATA ---------------- */
+const INP=window.INPUT||null; // written by model/build_data.py from the source Excel files
+const COMPS=INP?INP.comps.map(c=>({id:c.id,pcs:c.pcs})):[['IS1',125],['IS2',64],['OS1',96],['OS2',96],['GRev',78],['G3',192],['G3-5/7',77],['G4',162],['G5',196],['G6',224],['G7',299]].map(([id,pcs])=>({id,pcs}));
+const PCS=Object.fromEntries(COMPS.map(c=>[c.id,c.pcs]));
+// Existing supermarket stock (štaple) from sheet "Skladované materiály", active (OK) rows only
+const EXIST=INP?INP.exist:{'IS1 (2_XX)':28,'IS2 (2_46)':20,'IS2 (2_55)':20,'IS2 (2_56)':41,'OS1 (C2)':17,'OS1 (N2)':25,'OS1 (M2)':16,'OS1 (H2)':17,'OS2 (C2)':17,'OS2 (N2)':25,'OS2 (M2)':16,'OS2 (H2)':17,'GRev (2_XX)':43,'G1 (2_XX)':32,'G2/Rev (2_34)':25,'G2/Rev (2_35)':13,'G2/Rev (2_46)':14,'G3 (2_35)':17,'G3 (2_46)':15,'G3 (2_56)':30,'G3-5/7 (2_35)':19,'G3-5/7 (2_46)':18,'G3-5/7 (2_56)':36,'G4 (2_46)':9,'G4 (2_55)':9,'G4 (2_56)':18,'G5 (2_35)':9,'G5 (2_46)':8,'G5 (2_56)':16,'G6 (2_46)':7,'G6 (2_55)':8,'G6 (2_56)':13,'G7 (2_35)':6,'G7 (2_46)':5,'G7 (2_56)':10};
+// Fallback Prevodník (used only without data/input.js): component -> family -> material code
+const FAM={'IS2':{56:'2_56',55:'2_55',46:'2_46'},'G2/Rev':{56:'2_34',55:'2_35',46:'2_46'},'G3':{56:'2_56',55:'2_35',46:'2_46'},'G3-5/7':{56:'2_56',55:'2_35',46:'2_46'},'G4':{56:'2_56',55:'2_55',46:'2_46'},'G5':{56:'2_56',55:'2_35',46:'2_46'},'G6':{56:'2_56',55:'2_55',46:'2_46'},'G7':{56:'2_56',55:'2_35',46:'2_46'}};
+const COMMON=new Set(['IS1','GRev','G1']);
+function bomOf(v){
+  if(v==='INV D3.6')return null;
+  if(INP)return INP.bom[v]||null;
+  const [fam,spec]=v.split(' ');const b={};
+  for(const c of COMPS){let code;
+    if(COMMON.has(c.id))code='2_XX';else if(c.id==='OS1'||c.id==='OS2')code=spec;else code=FAM[c.id][fam];
+    b[c.id]=c.id+' ('+code+')';}
+  return b;
+}
+const R=(v,q,drive,pack)=>({v,q,drive:drive||'',pack:pack||'Steel rack'});
+const PLAN_STD=INP?INP.plan.map(day=>day.map(r=>R(r.v,r.q,r.drive,r.pack))):[[],
+ [R('56 N2',550,'AWD')],
+ [R('INV D3.6',220),R('56 C2',160,'FWD'),R('56 M2',140,'FWD'),R('56 N2',330,'AWD'),R('46 N2',210,'LSD-AWD')],
+ [R('46 N2',130,'LSD-AWD'),R('56 N2',100,'AWD'),R('56 C2',190,'AWD'),R('56 H2',130,'FWD')],
+ [],
+ [R('56 H2',120,'FWD'),R('56 M2',130,'FWD'),R('56 H2',100,'FWD'),R('56 N2',100,'AWD'),R('46 N2',60,'LSD-AWD')],
+ [R('46 N2',30,'LSD-AWD','Carton'),R('46 N2',230,'LSD-AWD'),R('56 N2',60,'AWD','Carton'),R('56 N2',620,'AWD')]];
+const PLAN_MIX=[[],
+ [R('56 N2',300,'AWD'),R('46 N2',250,'LSD-AWD')],
+ [R('INV D3.6',220),R('46 N2',300,'LSD-AWD'),R('56 C2',160,'FWD'),R('46 N2',150,'LSD-AWD'),R('56 N2',230,'AWD')],
+ [R('46 N2',250,'LSD-AWD'),R('56 C2',190,'AWD'),R('56 H2',110,'FWD')],
+ [],
+ [R('56 H2',120,'FWD'),R('46 N2',200,'LSD-AWD'),R('56 M2',130,'FWD'),R('46 N2',60,'LSD-AWD')],
+ [R('46 N2',400,'LSD-AWD'),R('56 N2',540,'AWD')]];
+const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun','Mon+1'];
+const CAP=INP?INP.cap:[0,535,1070,535,535,535,1070];
+const SHIFTS=INP?INP.shifts:['','D','D+N','N','','D','D+N'];
+const dayStartH=(d,P)=>SHIFTS[d]==='N'?P.dayStart+12:P.dayStart; // night-only day starts at 18:00
+
+/* ---------------- PARAMETERS ---------------- */
+const PDEF=[
+ ['jph','Line rate (JPH)',55,1],['nAmr','AMR fleet',2,1],['speed','AMR speed (km/h)',4,0.5],['dist','SM → Line 2 (m)',200,10],
+ ['handling','Load / unload (min)',0.5,0.1],['prep','Preparation in existing SM (min)',5,1],['coTime','Changeover (min)',20,5],['coCap','Changeover positions',8,1],
+ ['service','Material availability (%)',99.5,0.1],['ltCv','Lead-time variability (CV)',0.3,0.05],['prepBuffer','Pre-stage reserve (min)',15,5],
+ ['knownDelay','Known extra time per trip (min)',0,1],['dayStart','Shift start (h)',6,1],['footL','Štapel length (m)',0.63,0.01],['footW','Štapel width (m)',0.43,0.01],['aisle','AMR aisle (m)',2.5,0.1],['retWait','Max wait of returns (min)',30,5]];
+const P0=Object.fromEntries(PDEF.map(d=>[d[0],d[2]]));
+let P={...P0};
+let plan=JSON.parse(JSON.stringify(PLAN_STD));
+let planName='std';
+
+/* ---------------- MATH ---------------- */
+function invNorm(p){ // Acklam approximation of the inverse normal CDF
+  const a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.357751867269,-30.66479806614716,2.506628277459239],
+  b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572],
+  c=[-0.007784894002430293,-0.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783],
+  d=[0.007784695709041462,0.3224671290700398,2.445134137142996,3.754408661907416];
+  const pl=0.02425;let q,r;
+  if(p<pl){q=Math.sqrt(-2*Math.log(p));return(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+  if(p>1-pl){q=Math.sqrt(-2*Math.log(1-p));return-(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+  q=p-0.5;r=q*q;return(((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);
+}
+function derived(P){
+  const rate=P.jph/60, travel=P.dist/(P.speed*1000/60), h=P.handling;
+  const kd=P.knownDelay||0;
+  const prep=P.prep||0;
+  const ltNom=prep+h+travel+kd+h, cycle=4*h+2*travel+kd, ltPlan=ltNom+cycle;
+  const z=invNorm(P.service/100), ss=z*rate*P.ltCv*ltPlan, dLT=rate*ltPlan, rop=Math.ceil(dLT+ss);
+  return {rate,travel,h,kd,prep,ltNom,cycle,ltPlan,z,ss,dLT,rop};
+}
+function stacksMinMax(pcs,rop){const min=Math.max(1,Math.ceil(rop/pcs));return {min,max:min+1};}
+
+/* ---------------- TIME ---------------- */
+const pad=n=>String(n).padStart(2,'0');
+function fmt(t){t=Math.round(t);const d=Math.floor(t/1440),m=((t%1440)+1440)%1440;return (DAYS[d]||('D'+d))+' '+pad(Math.floor(m/60))+':'+pad(m%60);}
+function fmtHM(t){t=Math.round(t);const m=((t%1440)+1440)%1440;return pad(Math.floor(m/60))+':'+pad(m%60);}
+function mkBreaks(P){
+  const base=P.dayStart*60;
+  const breakEnd=t=>{const m=((t-base)%1440+1440)%1440;if(m>=345&&m<375)return t+(375-m);if(m>=1065&&m<1095)return t+(1095-m);return 0;};
+  const nextBreak=t=>{const m=((t-base)%1440+1440)%1440,b0=t-m;if(m<345)return b0+345;if(m<1065)return b0+1065;return b0+1440+345;};
+  const addWork=(t,w)=>{let g=0;while(w>1e-9&&g++<200){const be=breakEnd(t);if(be){t=be;continue;}const nb=nextBreak(t),take=Math.min(w,nb-t);t+=take;w-=take;}return t;};
+  return {inBreak:t=>breakEnd(t)>0,addWork};
+}
+
+/* ---------------- SIMULATION ---------------- */
+function simulate(P,plan,opt={}){
+  const D=derived(P),{rate,travel,h,ltNom,cycle,ltPlan,rop}=D;
+  const delay=(opt.delay||0)+(P.knownDelay||0), outage=opt.outage||null;
+  const B=mkBreaks(P), dt=0.5;
+  const runs=[];let pd=-1;
+  plan.forEach((day,d)=>day.forEach(r=>{if(r.q>0){runs.push({...r,day:d,first:d!==pd,dayStart:d*1440+dayStartH(d,P)*60,bom:bomOf(r.v)});pd=d;}}));
+  const pts={};COMPS.forEach(c=>pts[c.id]={mat:null,active:null,reserve:null});
+  const coZone=[],outbound=[],reqs=[],open=[],events=[];
+  const amrs=Array.from({length:P.nAmr},(_,i)=>({id:i,busy:false,trip:null,busyMin:0,trips:0}));
+  const line={r:0,phase:runs.length?'wait':'done',rem:runs.length?runs[0].q:0,coStart:0,coEnd:0,lastKey:null};
+  const segs=[],snaps=[],stopLog=[],coLog=[];
+  const coReq={};
+  let t=0,produced=0,stopMin=0,runMin=0,coPeak=0,outPeak=0,pointPeak=0,totalPeak=0,overflow=0,rid=0;
+  const T_END=8*1440;
+
+  const available=(c,m)=>{const p=pts[c];let s=0;if(p.active&&p.active.mat===m)s+=p.active.pcs;if(p.reserve&&p.reserve.mat===m)s+=p.reserve.pcs;for(const z of coZone)if(z.comp===c&&z.mat===m)s+=z.pcs;return s;};
+  const newReq=(type,comp,mat,due,extra={})=>{const r={id:++rid,type,comp,mat,pcs:PCS[comp],created:t,due,status:'open',dispatched:null,delivered:null,amr:null,prio:null,...extra};reqs.push(r);open.push(r);return r;};
+  const pushOut=(kind,comp,mat,pcs,ex={})=>{const o={kind,comp,mat,pcs,t,claimed:false};o.req=newReq('RETURN',comp,mat,Infinity,{kind,left:pcs,...ex});outbound.push(o);};
+  const shiftOf=tt=>Math.floor((tt-P.dayStart*60)/720);const cons={},prodS={},peakS={},tripsS={};
+  const addCons=(m,q)=>{const k=shiftOf(t);(cons[k]??={})[m]=(cons[k][m]||0)+q;};
+  function promote(c,m){const p=pts[c];
+    if(p.reserve&&p.reserve.mat===m){p.active=p.reserve;p.active.staged=false;p.reserve=null;return true;}
+    const i=coZone.findIndex(z=>z.comp===c&&z.mat===m);if(i>=0){p.active=coZone.splice(i,1)[0];p.active.staged=false;return true;}
+    return false;}
+  function consume(c,m,a){const p=pts[c];
+    while(a>1e-9){
+      if(!p.active||p.active.mat!==m){if(!promote(c,m))return;}
+      const take=Math.min(a,p.active.pcs);p.active.pcs-=take;a-=take;addCons(m,take);
+      if(p.active.pcs<=1e-9){pushOut('EMPTY',c,m,0);p.active=null;promote(c,m);}
+    }}
+  function swap(R){
+    const changed=[];
+    for(const c of COMPS){const id=c.id,nm=R.bom[id],p=pts[id];if(p.mat===nm)continue;changed.push(id);
+      if(p.active&&p.active.mat!==nm){pushOut(p.active.pcs>1e-6?'PARTIAL':'EMPTY',id,p.active.mat,p.active.pcs,{co:line.r});p.active=null;}
+      if(p.reserve&&p.reserve.mat!==nm){pushOut('PARTIAL',id,p.reserve.mat,p.reserve.pcs,{co:line.r});p.reserve=null;}
+      for(let i=coZone.length-1;i>=0;i--){const z=coZone[i];if(z.comp===id&&z.mat!==nm){pushOut('PARTIAL',id,z.mat,z.pcs,{co:line.r});coZone.splice(i,1);}}
+      p.mat=nm;if(!p.active)promote(id,nm);}
+    return changed;}
+  function needRemaining(c,m){let n=0;
+    for(let i=line.r;i<runs.length;i++){const R=runs[i];if(!R.bom)continue;if(R.bom[c]!==m)break;n+=(i===line.r?line.rem:R.q);}
+    return n;}
+  function schedule(){
+    const out=[];let tc=t;
+    for(let i=line.r;i<runs.length;i++){const R=runs[i];let coStart=null,start;
+      if(i===line.r&&line.phase==='run'){start=t;}
+      else if(i===line.r&&line.phase==='co'){coStart=line.coStart;start=line.coEnd;}
+      else{const key=i===line.r?line.lastKey:runs[i-1].v;
+        if(R.v!==key){coStart=R.first?Math.max(tc,R.dayStart-P.coTime):tc;start=coStart+P.coTime;}
+        else start=R.first?Math.max(tc,R.dayStart):tc;}
+      const qty=i===line.r?line.rem:R.q;const end=B.addWork(Math.max(start,tc),qty/rate);
+      out[i]={coStart,start,end};tc=end;}
+    return out;}
+  function place(r){const c=r.comp,m=r.mat,p=pts[c];const st={comp:c,mat:m,pcs:PCS[c],staged:false};
+    if(p.mat===m){if(!p.active){p.active=st;return'point';}if(!p.reserve){p.reserve=st;return'point';}coZone.push(st);return'changeover pos.';}
+    const oldNeed=p.mat?needRemaining(c,p.mat):0,oldAct=(p.active&&p.active.mat===p.mat)?p.active.pcs:0;
+    if(!p.reserve&&oldAct>=oldNeed-1e-6){st.staged=true;p.reserve=st;return'point (pre-staged)';}
+    coZone.push(st);return'changeover pos.';}
+  function canPlace(r){const p=pts[r.comp];
+    if(p.mat===r.mat)return true;
+    const oldNeed=p.mat?needRemaining(r.comp,p.mat):0,oldAct=(p.active&&p.active.mat===p.mat)?p.active.pcs:0;
+    if(!p.reserve&&oldAct>=oldNeed-1e-6)return true;
+    const inbound=open.filter(x=>x.status==='assigned'&&x.type==='CO_IN').length;
+    return coZone.length+inbound<P.coCap;}
+  const amrDown=a=>outage&&a.id===0&&t>=outage[0]&&t<outage[1];
+  function claim(k){const picks=[];for(const o of outbound){if(picks.length>=k)break;if(!o.claimed){o.claimed=true;picks.push(o);}}
+    for(const o of picks)outbound.splice(outbound.indexOf(o),1);return picks;}
+  function finish(r,tt){r.status='done';r.delivered=tt;const i=open.indexOf(r);if(i>=0)open.splice(i,1);}
+  function dispatch(){
+    for(const a of amrs){if(a.busy||amrDown(a))continue;
+      const cands=open.filter(r=>r.status==='open'&&r.type!=='RETURN'&&t>=r.created+(P.prep||0)-1e-9&&canPlace(r)).sort((x,y)=>x.due-y.due);
+      const load=cands.slice(0,2);
+      const ready=outbound.filter(o=>!o.claimed);
+      if(load.length){
+        const t0=t;a.busy=true;a.trips++;tripsS[shiftOf(t)]=(tripsS[shiftOf(t)]||0)+1;
+        for(const r of load){r.status='assigned';r.dispatched=t;r.amr=a.id+1;const slack=r.due-t-ltNom;r.slack=slack;r.prio=slack<0?'P1':slack<ltPlan?'P2':'P3';}
+        const tArr=t+h+travel+delay,tDel=tArr+h;
+        a.trip={kind:'deliver',tDep:t,tArr,tDel,load:load.map(r=>r.mat),ret:[],tBack:null,tHome:null};
+        events.push({t:tDel,fn:()=>{
+          for(const r of load){r.placed=place(r);finish(r,tDel);}
+          const picks=claim(2);a.trip.ret=picks.map(o=>o.mat);
+          for(const o of picks){o.req.status='assigned';o.req.dispatched=tDel;o.req.amr=a.id+1;o.req.prio='P4';}
+          const rs=tDel+(picks.length?h:0),tBack=rs+travel,tHome=tBack+(picks.length?h:0);
+          a.trip.rs=rs;a.trip.tBack=tBack;a.trip.tHome=tHome;
+          events.push({t:tHome,fn:()=>{for(const o of picks)finish(o.req,tHome);a.busyMin+=tHome-t0;a.busy=false;a.trip=null;}});
+        }});
+      } else if(ready.length>=2||(ready.length&&t-ready[0].t>=P.retWait)){
+        const t0=t;a.busy=true;a.trips++;tripsS[shiftOf(t)]=(tripsS[shiftOf(t)]||0)+1;
+        const tArr=t+travel+delay;
+        a.trip={kind:'return',tDep:t,tArr,tDel:tArr,rs:tArr+h,load:[],ret:[],tBack:tArr+h+travel,tHome:tArr+2*h+travel};
+        events.push({t:tArr,fn:()=>{const picks=claim(2);a.trip.ret=picks.map(o=>o.mat);
+          for(const o of picks){o.req.status='assigned';o.req.dispatched=tArr;o.req.amr=a.id+1;o.req.prio='P4';}
+          const th=a.trip.tHome;
+          events.push({t:th,fn:()=>{for(const o of picks)finish(o.req,th);a.busyMin+=th-t0;a.busy=false;a.trip=null;}});}});
+      }
+    }}
+  function amrPos(a){const tr=a.trip;if(!tr)return{f:0,s:'idle',load:0,ret:0,down:amrDown(a)};
+    let f,s;const s0=tr.tDep+(tr.kind==='deliver'?h:0);
+    if(t<s0){f=0;s='loading';}
+    else if(t<tr.tArr){f=(t-s0)/Math.max(1e-6,tr.tArr-s0);s='to line';}
+    else if(tr.tBack==null||t<tr.rs){f=1;s='at line';}
+    else if(t<tr.tBack){f=1-(t-tr.rs)/Math.max(1e-6,tr.tBack-tr.rs);s='to SM';}
+    else{f=0;s='unloading';}
+    return{f,s,load:t<tr.tDel?tr.load.length:0,ret:(tr.rs!=null&&t>=tr.rs)?tr.ret.length:0,down:false};}
+
+  let lastKey=null,shockDone=false;const shockLog=[];
+  while(t<=T_END){
+    // 1. events (deliveries, AMR returns)
+    events.sort((a,b)=>a.t-b.t);
+    while(events.length&&events[0].t<=t+1e-9){events.shift().fn();}
+    // 1b. sudden drop below the trigger (quality block / miscount) for the stress scenarios
+    if(opt.shock&&!shockDone&&t>=opt.shock.t){shockDone=true;
+      for(const c of COMPS){const id=c.id;if(opt.shock.comps!=='all'&&!opt.shock.comps.includes(id))continue;const p=pts[id];if(!p.mat)continue;
+        if(p.active&&p.active.mat===p.mat)p.active.pcs=Math.min(p.active.pcs,opt.shock.left);
+        if(p.reserve&&p.reserve.mat===p.mat)p.reserve=null;
+        for(let i=coZone.length-1;i>=0;i--)if(coZone[i].comp===id&&coZone[i].mat===p.mat)coZone.splice(i,1);
+        shockLog.push(id);}}
+    // 2. line
+    let label='idle';
+    if(line.phase==='wait'){const R=runs[line.r];
+      if(R.v!==line.lastKey){const th=R.first?R.dayStart-P.coTime:-1;
+        if(t>=th){line.phase='co';line.coStart=t;line.coEnd=t+P.coTime;R.coStart=t;
+          const ch=R.bom?swap(R):[];coLog.push({run:line.r,from:line.lastKey,to:R.v,t,changed:ch});line.lastKey=R.v;}}
+      else if(t>=(R.first?R.dayStart:-1)){line.phase='run';R.start=t;}}
+    if(line.phase==='co'){label='co';if(t>=line.coEnd-1e-9){line.phase='run';runs[line.r].start=t;}}
+    if(line.phase==='run'){const R=runs[line.r];
+      if(B.inBreak(t))label='break';
+      else{const a=Math.min(rate*dt,line.rem);let ok=true;const miss=[];
+        if(R.bom)for(const c of COMPS){if(available(c.id,R.bom[c.id])<a-1e-9){ok=false;miss.push(c.id);}}
+        if(ok){if(R.bom)for(const c of COMPS)consume(c.id,R.bom[c.id],a);line.rem-=a;produced+=a;prodS[shiftOf(t)]=(prodS[shiftOf(t)]||0)+a;runMin+=dt;label='run';}
+        else{label='stop';stopMin+=dt;stopLog.push({t,miss});}}
+      if(line.rem<=1e-9){R.end=t+dt;line.r++;if(line.r>=runs.length)line.phase='done';else{line.phase='wait';line.rem=runs[line.r].q;}}}
+    const key=label+'|'+(label==='idle'?'':line.r);
+    if(key===lastKey&&segs.length)segs[segs.length-1].t1=t+dt;else segs.push({label,run:Math.min(line.r,runs.length-1),t0:t,t1:t+dt});
+    lastKey=key;
+    // 3. triggers
+    if(line.phase!=='done'){
+      const sc=schedule();
+      for(const c of COMPS){const id=c.id,m=pts[id].mat;if(!m)continue;
+        const need=needRemaining(id,m);if(need<=0)continue;
+        const onh=available(id,m);let pipe=0;for(const r of open)if(r.comp===id&&r.mat===m&&r.type!=='RETURN')pipe+=r.pcs;
+        let fi=-1;for(let i=line.r;i<runs.length;i++){if(runs[i].bom&&runs[i].bom[id]===m){fi=i;break;}}
+        const st=fi<0?t:(fi===line.r&&line.phase==='run'?t:(sc[fi]?sc[fi].start:t));
+        const due=Math.max(t,st)+onh/rate;
+        for(const r of open)if(r.type==='REPL'&&r.comp===id&&r.mat===m&&r.status==='open')r.due=due;
+        if(onh+pipe<need-1e-6&&onh+pipe<=rop){newReq('REPL',id,m,due,{tts:onh/rate,onh});}}
+      let k=-1;
+      for(let i=line.r;i<runs.length;i++){if(i===line.r&&line.phase!=='wait')continue;const Rk=runs[i];if(!Rk.bom)continue;
+        if(COMPS.some(c=>Rk.bom[c.id]!==pts[c.id].mat)){k=i;break;}}
+      if(k>=0){const S=sc[k]?(sc[k].coStart??sc[k].start):t;
+        if(!coReq[k]){const ch=COMPS.filter(c=>runs[k].bom[c.id]!==pts[c.id].mat).map(c=>c.id);
+          const lead=ltPlan+Math.ceil(ch.length/(2*P.nAmr))*cycle+P.prepBuffer;
+          if(S-t<=lead){coReq[k]={created:t,n:ch.length,lead};for(const id of ch)newReq('CO_IN',id,runs[k].bom[id],S,{run:k});}}
+        for(const r of open)if(r.type==='CO_IN'&&r.run===k&&r.status==='open')r.due=S;}
+    }
+    // 4. AMR dispatch
+    dispatch();
+    // peaks
+    let ps=0;for(const c of COMPS){const p=pts[c.id];if(p.active)ps++;if(p.reserve)ps++;}
+    pointPeak=Math.max(pointPeak,ps);coPeak=Math.max(coPeak,coZone.length);outPeak=Math.max(outPeak,outbound.length);
+    totalPeak=Math.max(totalPeak,ps+coZone.length+outbound.length);{const k=shiftOf(t);peakS[k]=Math.max(peakS[k]||0,ps+coZone.length+outbound.length);}if(coZone.length>P.coCap)overflow=Math.max(overflow,coZone.length-P.coCap);
+    // 5. snapshot every 5 min
+    if(Math.abs(t%5)<1e-9){
+      snaps.push({t,label,r:line.r,rem:line.rem,phase:line.phase,
+        pts:COMPS.map(c=>{const p=pts[c.id];return{mat:p.mat,a:p.active?{m:p.active.mat,p:p.active.pcs}:null,rs:p.reserve?{m:p.reserve.mat,p:p.reserve.pcs,s:p.reserve.staged}:null,co:coZone.filter(z=>z.comp===c.id&&z.mat===p.mat).reduce((s,z)=>s+z.pcs,0)};}),
+        co:coZone.map(z=>({c:z.comp,m:z.mat,p:z.pcs})),out:outbound.map(o=>({c:o.comp,m:o.mat,k:o.kind})),
+        amr:amrs.map(a=>amrPos(a)),open:open.filter(r=>r.created<=t).map(r=>r.id)});}
+    t+=dt;
+  }
+  for(const r of reqs){
+    if(r.type==='REPL')r.late=stopLog.some(s=>s.t>=r.created&&s.t<=(r.delivered??T_END)&&s.miss.includes(r.comp));
+    if(r.type==='CO_IN'){const cs=runs[r.run].coStart;r.late=r.delivered==null||(cs!=null&&r.delivered>cs+P.coTime+1e-6);r.coStartActual=cs;}}
+  const planned=runs.reduce((s,r)=>s+r.q,0);
+  const first=reqs.length?Math.min(...reqs.map(r=>r.created)):0, last=reqs.length?Math.max(...reqs.map(r=>r.delivered??T_END)):1;
+  const busy=amrs.reduce((s,a)=>s+a.busyMin,0);
+  return {P,D,runs,reqs,segs,snaps,coLog,coReq,stopLog,amrs,shock:opt.shock?{...opt.shock,hit:shockLog}:null,cons,prodS,peakS,tripsS,
+    kpi:{planned,produced:Math.round(produced),stopMin,runMin,avail:runMin?runMin/(runMin+stopMin):1,
+      nReq:reqs.length,nRepl:reqs.filter(r=>r.type==='REPL').length,nCo:reqs.filter(r=>r.type==='CO_IN').length,nRet:reqs.filter(r=>r.type==='RETURN').length,
+      lateRepl:reqs.filter(r=>r.type==='REPL'&&r.late).length,lateCo:reqs.filter(r=>r.type==='CO_IN'&&r.late).length,
+      util:busy/(P.nAmr*Math.max(1,last-first)),trips:amrs.reduce((s,a)=>s+a.trips,0),
+      coPeak,outPeak,pointPeak,totalPeak,overflow,nChange:coLog.filter(c=>c.changed.length).length,
+      p1:reqs.filter(r=>r.prio==='P1').length}};
+}
+
+/* ---------------- SCENARIOS ---------------- */
+const SCEN=[
+ {id:'std',name:'Standard plan · 55 JPH',desc:'Weekly Line 2 plan as given, 2 AMRs, nominal lead time.',plan:'std'},
+ {id:'mix',name:'Mix change',desc:'Same daily volumes, 46 N2 share raised from 18 % to 46 % and interleaved with 56.',plan:'mix'},
+ {id:'delay',name:'AMR delay +10 min, unplanned',desc:'Every AMR trip arrives 10 min later than planned (delivery 4 → 14 min). Triggers still use the nominal lead time.',plan:'std',delay:10},
+ {id:'known',name:'AMR delay +10 min, known',desc:'Same +10 min, entered in advance as a parameter. Trigger level, safety stock and pre-stage lead recalculate from it.',plan:'std',knownDelay:10},
+ {id:'trig',name:'Drop below trigger',desc:'Mid-run, 3 fast materials (IS2, G3-5/7, GRev) suddenly fall to 20 pcs, below the 28 pcs trigger (quality block of the reserve štapel). Tests trigger and priority.',plan:'std',shock:{comps:['IS2','G3-5/7','GRev'],left:20}},
+ {id:'burst',name:'Critical overlap · 1 AMR',desc:'Mid-run, every material falls to 12 pcs at once and only 1 AMR is available. Tests priority by time to stock-out under overload.',plan:'std',nAmr:1,shock:{comps:'all',left:12}},
+ {id:'outage',name:'AMR outage at changeover',desc:'One of two AMRs is down for 2 h around the largest changeover of the week.',plan:'std',outage:true},
+ {id:'one',name:'1 AMR · mix change',desc:'Single AMR on the mix-change plan: the largest changeovers (56 C2 ↔ 46 N2) compete with replenishment of running materials.',plan:'mix',nAmr:1},
+];
+let current='std',results={},tSel=2160,zoom='week',compSel='IS2',reqFilter='all',playing=null;
+
+function planFor(s){return s.plan==='mix'?(planName==='mix'?plan:PLAN_MIX):(planName==='std'?plan:PLAN_STD);}
+function runAll(){
+  results={};
+  const base=simulate(P,planFor(SCEN[0]));results.std=base;
+  const big=base.coLog.filter(c=>c.changed.length&&c.from).sort((a,b)=>b.changed.length-a.changed.length||a.t-b.t)[0];
+  const longest=base.runs.filter(r=>r.bom&&r.start!=null).sort((a,b)=>b.q-a.q)[0];
+  for(const s of SCEN.slice(1)){
+    const PP={...P};if(s.nAmr)PP.nAmr=s.nAmr;if(s.knownDelay)PP.knownDelay=(P.knownDelay||0)+s.knownDelay;
+    const opt={};if(s.delay)opt.delay=s.delay;
+    if(s.outage&&big)opt.outage=[big.t-100,big.t+20];
+    if(s.shock&&longest)opt.shock={...s.shock,t:Math.round((longest.start+90)/5)*5};
+    results[s.id]=simulate(PP,planFor(s),opt);
+    if(s.outage&&big)results[s.id].outageWin=opt.outage;}
+}
+
+/* ---------------- RENDER HELPERS ---------------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const codeOf=m=>{const x=/\(([^)]+)\)/.exec(m||'');return x?x[1]:'';};
+const MATCOL={'2_56':'var(--c56)','2_46':'var(--c46)','2_35':'var(--c35)','2_34':'var(--c34)','2_55':'var(--c55)','2_XX':'var(--cxx)','C2':'var(--cC2)','H2':'var(--cH2)','M2':'var(--cM2)','N2':'var(--cN2)'};
+const matCol=m=>MATCOL[codeOf(m)]||'var(--muted)';
+const VCOL={'56 C2':'var(--v56C2)','56 H2':'var(--v56H2)','56 M2':'var(--v56M2)','56 N2':'var(--v56N2)','46 N2':'var(--v46N2)','55 N2':'var(--v55N2)','INV D3.6':'var(--cInv)'};
+const f1=x=>(Math.round(x*10)/10).toLocaleString('en-US',{minimumFractionDigits:1,maximumFractionDigits:1});
+const f0=x=>Math.round(x).toLocaleString('en-US');
+const pct=(x,d=2)=>(x*100).toFixed(d)+' %';
+function zoomRange(res){
+  if(zoom==='week'){const rs=res.runs;const s0=rs[0]?(rs[0].coStart??rs[0].dayStart):1440;const s=Math.max(0,Math.floor(s0/1440)*1440+180);
+    const e=Math.ceil(((rs[rs.length-1]&&rs[rs.length-1].end)||7*1440)/60)*60+120;return[s,e];}
+  const d=+zoom;return[d*1440+240,d*1440+1440+300];}
+const maxStacksFor=(res,comp)=>stacksMinMax(PCS[comp],res.D.rop).max;
+
+/* ---------------- RENDER ---------------- */
+function renderScenarios(){
+  $('#scen-tabs').innerHTML=SCEN.map(s=>`<button role="tab" aria-pressed="${s.id===current}" data-s="${s.id}">${esc(s.name)}</button>`).join('');
+  const rows=SCEN.map(s=>{const k=results[s.id].kpi;const sel=s.id===current?' class="sel"':'';
+    const stopCls=k.stopMin>0?'p1':'p3';
+    return `<tr${sel} data-s="${s.id}" style="cursor:pointer"><td><b>${esc(s.name)}</b><br><span class="muted" style="white-space:normal;font-size:.78rem">${esc(s.desc)}</span></td>
+    <td class="n">${f0(k.produced)} / ${f0(k.planned)}</td><td class="n"><span class="pill ${stopCls}">${f1(k.stopMin)} min</span></td><td class="n">${pct(k.avail)}</td>
+    <td class="n">${k.nChange}</td><td class="n">${k.nRepl} / ${k.nCo} / ${k.nRet}</td><td class="n">${k.p1}</td><td class="n">${pct(k.util,0)}</td>
+    <td class="n">${k.coPeak}</td><td class="n">${k.outPeak}</td><td class="n">${k.totalPeak}</td></tr>`;}).join('');
+  $('#scen-table').innerHTML=`<thead><tr><th>Scenario</th><th class="n">Output / plan</th><th class="n">Line stop (material)</th><th class="n">Availability</th><th class="n">Changeovers</th><th class="n">Requests repl / CO / return</th><th class="n">P1 requests</th><th class="n">AMR util.</th><th class="n">Peak CO pos.</th><th class="n">Peak returns</th><th class="n">Peak štaple at line</th></tr></thead><tbody>${rows}</tbody>`;
+}
+function renderParams(){
+  $('#params').innerHTML=PDEF.map(([k,l,,st])=>`<label for="p-${k}">${esc(l)}<input type="number" id="p-${k}" data-k="${k}" step="${st}" value="${P[k]}"></label>`).join('');
+}
+function renderKPI(res){
+  const k=res.kpi,s=SCEN.find(x=>x.id===current);
+  $('#kpi-title').textContent=s.name;
+  $('#kpi-sub').textContent=s.desc+(res.outageWin?` Outage window ${fmt(res.outageWin[0])}–${fmtHM(res.outageWin[1])}.`:'')+(res.shock?` Drop at ${fmt(res.shock.t)}.`:'');
+  const target=P.service/100;
+  const tiles=[
+    ['Output vs plan',`${f0(k.produced)}<span class="muted" style="font-size:.9rem"> / ${f0(k.planned)}</span>`,k.produced>=k.planned-1?'good':'bad'],
+    ['Line stop from missing material',`${f1(k.stopMin)} min`,k.stopMin===0?'good':'bad'],
+    [`Material availability (target ${P.service} %)`,pct(k.avail),k.avail>=target?'good':'bad'],
+    ['AMR requests (repl / CO / return)',`${k.nRepl} / ${k.nCo} / ${k.nRet}`,''],
+    ['Late requests (repl / changeover)',`${k.lateRepl} / ${k.lateCo}`,k.lateRepl+k.lateCo===0?'good':'mid'],
+    ['AMR utilisation · trips',`${pct(k.util,0)} · ${k.trips}`,k.util<0.7?'good':k.util<0.85?'mid':'bad'],
+    ['Peak štaple at Line 2 SM',`${k.totalPeak}`,''],
+  ];
+  $('#kpis').innerHTML=tiles.map(([l,v,c])=>`<div class="kpi ${c}"><span class="l">${esc(l)}</span><span class="v">${v}</span></div>`).join('');
+}
+function renderGantt(res){
+  const [t0,t1]=zoomRange(res);const W=1200,L=110,Rr=10,Wp=W-L-Rr;const X=t=>L+(t-t0)/(t1-t0)*Wp;
+  const rows=[['Line 2',34],['Changeover req.',18],['Replenishment',18],['Returns',18],...res.amrs.map((a,i)=>['AMR '+(i+1),14])];
+  let y=26;const ys=rows.map(r=>{const v=y;y+=r[1]+8;return v;});const H=y+6;
+  const svg=$('#gantt');svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  let s=`<defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="var(--surface-2)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--muted)" stroke-width="2"/></pattern><clipPath id="gclip"><rect x="${L}" y="0" width="${Wp}" height="${H}"/></clipPath></defs>`;
+  const span=t1-t0, step=span>3000?360:span>1200?120:60;
+  for(let g=Math.ceil(t0/step)*step;g<=t1;g+=step){const x=X(g),isDay=g%1440===0;
+    s+=`<line x1="${x}" y1="18" x2="${x}" y2="${H-4}" stroke="var(${isDay?'--line':'--grid'})" stroke-width="${isDay?1.4:1}"/>`;
+    s+=`<text x="${x+3}" y="13" font-size="10" class="${isDay?'':'mut'} mono">${isDay?DAYS[g/1440]:fmtHM(g)}</text>`;}
+  rows.forEach((r,i)=>{s+=`<text x="4" y="${ys[i]+r[1]/2+4}" font-size="11" class="mut">${r[0]}</text>`;});
+  s+=`<g clip-path="url(#gclip)">`;
+  for(const g of res.segs){if(g.t1<t0||g.t0>t1||g.label==='idle')continue;const x0=X(Math.max(t0,g.t0)),x1=X(Math.min(t1,g.t1));const w=Math.max(.6,x1-x0);
+    const run=res.runs[g.run];let fill=run?VCOL[run.v]:'var(--muted)';
+    if(g.label==='co')fill='url(#hatch)';if(g.label==='stop')fill='var(--crit)';if(g.label==='break')fill='var(--grid)';
+    s+=`<rect x="${x0}" y="${ys[0]}" width="${w}" height="34" fill="${fill}"><title>${g.label==='run'?esc(run.v+' '+run.drive+' · '+run.q+' pcs'):g.label} ${fmt(g.t0)}–${fmtHM(g.t1)}</title></rect>`;}
+  for(const r of res.runs){if(r.start==null||r.end==null)continue;const x0=X(Math.max(t0,r.start)),x1=X(Math.min(t1,r.end));if(x1-x0>52)s+=`<text x="${x0+4}" y="${ys[0]+21}" font-size="11" style="fill:#fff;font-weight:600" pointer-events="none">${esc(r.v)} · ${r.q}</text>`;}
+  const rowOf={CO_IN:1,REPL:2,RETURN:3};const col={CO_IN:'var(--accent)',REPL:'var(--ok)',RETURN:'var(--muted)'};
+  for(const r of res.reqs){const tt=r.created;if(tt>t1||(r.delivered??tt)<t0)continue;const i=rowOf[r.type];const x=X(Math.max(t0,tt));
+    const x2=r.delivered!=null?X(Math.min(t1,r.delivered)):x+2;
+    s+=`<rect x="${x}" y="${ys[i]+3}" width="${Math.max(2,x2-x)}" height="12" rx="2" fill="${col[r.type]}" opacity="${r.late?1:.75}" ${r.late?'stroke="var(--crit)" stroke-width="1.5"':''}><title>#${r.id} ${r.type} ${esc(r.mat)} created ${fmt(r.created)} done ${r.delivered!=null?fmt(r.delivered):'—'}</title></rect>`;}
+  res.amrs.forEach((a,i)=>{const yy=ys[4+i];for(const r of res.reqs){if(r.amr!==a.id+1||r.dispatched==null)continue;const d0=r.dispatched,d1=r.delivered??d0+8;if(d1<t0||d0>t1)continue;
+    s+=`<rect x="${X(Math.max(t0,d0))}" y="${yy}" width="${Math.max(1,X(Math.min(t1,d1))-X(Math.max(t0,d0)))}" height="14" fill="${col[r.type]}" opacity=".55"/>`;}});
+  if(res.shock&&res.shock.t>=t0&&res.shock.t<=t1){const x=X(res.shock.t);s+=`<line x1="${x}" x2="${x}" y1="${ys[0]-4}" y2="${H-4}" stroke="var(--crit)" stroke-width="2" stroke-dasharray="4 3"><title>Drop below trigger: ${res.shock.hit.join(', ')}</title></line>`;}
+  if(res.outageWin){const[o0,o1]=res.outageWin;s+=`<rect x="${X(Math.max(t0,o0))}" y="${ys[4]-2}" width="${Math.max(0,X(Math.min(t1,o1))-X(Math.max(t0,o0)))}" height="18" fill="var(--crit-soft)" stroke="var(--crit)" stroke-dasharray="3 2"><title>AMR 1 down</title></rect>`;}
+  s+=`</g>`;
+  if(tSel>=t0&&tSel<=t1){const x=X(tSel);s+=`<line x1="${x}" y1="18" x2="${x}" y2="${H-2}" stroke="var(--accent)" stroke-width="2"/><polygon points="${x-5},18 ${x+5},18 ${x},25" fill="var(--accent)"/>`;}
+  svg.innerHTML=s;
+  svg.onclick=e=>{const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const p=pt.matrixTransform(svg.getScreenCTM().inverse());if(p.x<L)return;setT(t0+(p.x-L)/Wp*(t1-t0));};
+  $('#gantt-legend').innerHTML=Object.entries(VCOL).filter(([v])=>res.runs.some(r=>r.v===v)).map(([v,c])=>`<span><span class="swatch" style="background:${c}"></span>${v}</span>`).join('')+
+   `<span><span class="swatch" style="background:var(--crit)"></span>Line stop</span><span><span class="swatch" style="background:var(--accent)"></span>Changeover request</span><span><span class="swatch" style="background:var(--ok)"></span>Replenishment</span><span><span class="swatch" style="background:var(--muted)"></span>Return (empty / partial)</span>`;
+  $('#zoom-tabs').innerHTML=[['week','Week'],...[1,2,3,5,6].filter(d=>res.runs.some(r=>r.day===d)).map(d=>[String(d),DAYS[d]])].map(([z,l])=>`<button aria-pressed="${zoom===z}" data-z="${z}">${l}</button>`).join('');
+}
+function snapAt(res,t){const sn=res.snaps;if(!sn.length)return null;let i=Math.round((t-sn[0].t)/5);i=Math.max(0,Math.min(sn.length-1,i));return sn[i];}
+function renderLayout(res){
+  const sn=snapAt(res,tSel);const svg=$('#layout');if(!sn){svg.innerHTML='';return;}
+  const slots=Math.max(2,...COMPS.map(c=>maxStacksFor(res,c.id)));
+  const x0=30,cw=72,sw=60,sh=34,top=78;
+  const coN=Math.max(P.coCap,res.kpi.coPeak);const coCols=Math.max(4,Math.ceil(coN/2));
+  const pointsH=top+slots*(sh+6);
+  const aisleY=pointsH+8, aisleH=48, zoneY=aisleY+aisleH+44;
+  const H=zoneY+2*(sh+6)+28;
+  svg.setAttribute('viewBox',`0 0 1000 ${H}`);
+  let s='';
+  s+=`<rect x="${x0-8}" y="10" width="${COMPS.length*cw+4}" height="26" rx="3" fill="var(--accent)"/><text x="${x0}" y="28" font-size="13" style="font-weight:600;fill:#1a1a1a">ASSEMBLY LINE 2 · consumption points</text>`;
+  const run=sn.r<res.runs.length?res.runs[sn.r]:null;
+  s+=`<text x="${x0+COMPS.length*cw-10}" y="28" font-size="12" text-anchor="end" style="fill:#1a1a1a" class="mono">${run?esc(run.v)+' · '+f0(sn.rem)+' left':'plan done'}</text>`;
+  COMPS.forEach((c,i)=>{const x=x0+i*cw;const p=sn.pts[i];
+    s+=`<text x="${x+sw/2}" y="52" font-size="11.5" text-anchor="middle" style="font-weight:600">${esc(c.id)}</text>`;
+    s+=`<text x="${x+sw/2}" y="67" font-size="9.5" text-anchor="middle" class="mut mono">${p.mat?esc(codeOf(p.mat)):'—'}</text>`;
+    const stacks=[p.a,p.rs];
+    for(let k=0;k<slots;k++){const y=top+k*(sh+6);const st=stacks[k];
+      s+=`<rect x="${x}" y="${y}" width="${sw}" height="${sh}" rx="3" fill="var(--surface-2)" stroke="var(--line)"/>`;
+      if(st){const col=matCol(st.m),fr=Math.max(0,Math.min(1,st.p/c.pcs));
+        s+=`<rect x="${x+2}" y="${y+2+(sh-4)*(1-fr)}" width="${sw-4}" height="${(sh-4)*fr}" rx="2" fill="${col}" opacity="${st.s?.55:1}"/>`;
+        s+=`<rect x="${x}" y="${y}" width="${sw}" height="${sh}" rx="3" fill="none" stroke="${col}" stroke-width="2" ${st.s?'stroke-dasharray="4 3"':''}><title>${esc(st.m)} · ${f0(st.p)} / ${c.pcs} pcs${st.s?' · pre-staged for next variant':''}</title></rect>`;
+        s+=`<text x="${x+sw/2}" y="${y+sh/2+4}" font-size="10" text-anchor="middle" class="mono" style="paint-order:stroke;stroke:var(--surface);stroke-width:3px">${f0(st.p)}</text>`;}
+      if(i===0)s+=`<text x="${x-5}" y="${y+sh/2+3}" font-size="9" text-anchor="end" class="mut">${k===0?'A':'R'}</text>`;}
+  });
+  s+=`<rect x="${x0-8}" y="${aisleY}" width="${1000-x0}" height="${aisleH}" fill="var(--surface-2)" stroke="var(--line)"/>`;
+  s+=`<line x1="${x0}" y1="${aisleY+aisleH/2}" x2="990" y2="${aisleY+aisleH/2}" stroke="var(--line)" stroke-dasharray="8 6"/>`;
+  s+=`<text x="${x0}" y="${aisleY+aisleH+14}" font-size="10" class="mut">AMR aisle ${P.aisle} m · drop point at the line</text>`;
+  s+=`<text x="992" y="${aisleY+aisleH+14}" font-size="10" text-anchor="end" class="mut">to existing supermarket · ${P.dist} m →</text>`;
+  const dropX=x0+6.5*cw, exitX=968;
+  sn.amr.forEach((a,i)=>{const x=exitX-(exitX-dropX)*a.f;const y=aisleY+10+(i%2)*18;
+    const fill=a.down?'var(--crit)':a.s==='idle'?'var(--muted)':'var(--ink)';
+    s+=`<g><rect x="${x-18}" y="${y}" width="36" height="14" rx="3" fill="${fill}"/><text x="${x}" y="${y+10.5}" font-size="9" text-anchor="middle" style="fill:var(--surface);font-weight:600">AMR ${i+1}</text>`;
+    for(let j=0;j<a.load;j++)s+=`<rect x="${x-15+j*16}" y="${y-6}" width="14" height="5" fill="var(--accent)"/>`;
+    for(let j=0;j<a.ret;j++)s+=`<rect x="${x-15+j*16}" y="${y-6}" width="14" height="5" fill="var(--muted)"/>`;
+    s+=`<title>AMR ${i+1}: ${a.down?'down':a.s}${a.load?' · '+a.load+' full':''}${a.ret?' · '+a.ret+' return':''}</title></g>`;});
+  s+=`<text x="${x0}" y="${zoneY-6}" font-size="11" style="font-weight:600">Changeover positions · ${P.coCap} configured, peak ${res.kpi.coPeak}</text>`;
+  for(let k=0;k<coN;k++){const col=k%coCols,row=Math.floor(k/coCols);const x=x0+col*cw,y=zoneY+row*(sh+6);const st=sn.co[k];
+    s+=`<rect x="${x}" y="${y}" width="${sw}" height="${sh}" rx="3" fill="var(--surface-2)" stroke="${k>=P.coCap?'var(--crit)':'var(--line)'}" ${k>=P.coCap?'stroke-dasharray="3 2"':''}/>`;
+    if(st){s+=`<rect x="${x+2}" y="${y+2}" width="${sw-4}" height="${sh-4}" rx="2" fill="${matCol(st.m)}"><title>${esc(st.m)}</title></rect><text x="${x+sw/2}" y="${y+sh/2+4}" font-size="9.5" text-anchor="middle" style="fill:#fff;font-weight:600">${esc(st.c)}</text>`;}}
+  const rx=x0+(coCols+0.5)*cw;const rCols=Math.max(1,Math.floor((995-rx)/cw));const retN=Math.min(rCols*2,Math.max(4,res.kpi.outPeak));
+  s+=`<text x="${rx}" y="${zoneY-6}" font-size="11" style="font-weight:600">Empties &amp; returns · peak ${res.kpi.outPeak}</text>`;
+  for(let k=0;k<retN;k++){const col=k%rCols,row=Math.floor(k/rCols);const x=rx+col*cw,y=zoneY+row*(sh+6);const st=sn.out[k];
+    s+=`<rect x="${x}" y="${y}" width="${sw}" height="${sh}" rx="3" fill="var(--surface-2)" stroke="var(--line)"/>`;
+    if(st){s+=`<rect x="${x+2}" y="${y+2}" width="${sw-4}" height="${sh-4}" rx="2" fill="none" stroke="${matCol(st.m)}" stroke-width="2" ${st.k==='EMPTY'?'stroke-dasharray="3 2"':''}><title>${esc(st.m)} · ${st.k==='EMPTY'?'empty basket':'partial return'}</title></rect><text x="${x+sw/2}" y="${y+sh/2+4}" font-size="9" text-anchor="middle">${st.k==='EMPTY'?'empty':esc(st.c)}</text>`;}}
+  if(sn.out.length>retN)s+=`<text x="${rx}" y="${zoneY+2*(sh+6)+12}" font-size="10" class="mut">+${sn.out.length-retN} more waiting</text>`;
+  svg.innerHTML=s;
+  const lab={run:'Producing',co:'Changeover',stop:'LINE STOP · material missing',break:'Break',idle:'No production'}[sn.label]||sn.label;
+  const cls=sn.label==='stop'?'p1':sn.label==='run'?'p3':sn.label==='co'?'p2':'p4';
+  $('#line-status').innerHTML=`<span class="pill ${cls}">${lab}</span> ${run&&sn.label!=='idle'?`<span class="num">${esc(run.v)} ${esc(run.drive)}</span>`:''}`;
+  const reqById=new Map(res.reqs.map(r=>[r.id,r]));
+  const list=sn.open.map(id=>reqById.get(id)).filter(Boolean).filter(r=>!(r.delivered!=null&&r.delivered<=tSel));
+  list.sort((a,b)=>(a.type==='RETURN')-(b.type==='RETURN')||a.due-b.due);
+  $('#openlist').innerHTML=list.length?list.slice(0,40).map(r=>{const assigned=r.dispatched!=null&&r.dispatched<=tSel;
+    const slack=r.type==='RETURN'?null:r.due-tSel-res.D.ltNom;const pr=r.type==='RETURN'?'P4':slack<0?'P1':slack<res.D.ltPlan?'P2':'P3';
+    return `<div><span class="pill ${pr.toLowerCase()}">${pr}</span><span class="pill t-${r.type}">${r.type==='CO_IN'?'CHANGEOVER':r.type}</span><span class="num">${esc(r.mat)}</span><span class="muted">${r.type==='RETURN'?(r.kind==='EMPTY'?'empty basket':'partial'):'due '+fmtHM(r.due)}</span>${assigned?`<span class="muted">· AMR ${r.amr}</span>`:''}</div>`;}).join(''):'<span class="muted">No open requests.</span>';
+  $('#clock').textContent=fmt(tSel);$('#clock2').textContent=fmt(tSel);
+  const codes=new Set();res.runs.forEach(r=>r.bom&&Object.values(r.bom).forEach(m=>codes.add(codeOf(m))));
+  $('#mat-legend').innerHTML=[...codes].map(c=>`<span><span class="swatch" style="background:${MATCOL[c]}"></span>${c}</span>`).join('')+'<span>A = active štapel · R = reserve or next variant pre-staged</span>';
+}
+function renderChart(res){
+  const [t0,t1]=zoomRange(res);const W=1200,H=230,L=56,Rr=12,T=14,Bt=34;const ci=COMPS.findIndex(c=>c.id===compSel);const pcs=PCS[compSel];
+  const ymax=pcs*Math.max(2,maxStacksFor(res,compSel));const X=t=>L+(t-t0)/(t1-t0)*(W-L-Rr),Y=v=>T+(1-v/ymax)*(H-T-Bt);
+  let s='';
+  for(let k=0;k<=ymax;k+=pcs){s+=`<line x1="${L}" x2="${W-Rr}" y1="${Y(k)}" y2="${Y(k)}" stroke="var(--grid)"/><text x="${L-6}" y="${Y(k)+4}" font-size="10" text-anchor="end" class="mut mono">${k}</text>`;}
+  const span=t1-t0,step=span>3000?360:span>1200?120:60;
+  for(let g=Math.ceil(t0/step)*step;g<=t1;g+=step){const isDay=g%1440===0;s+=`<text x="${X(g)}" y="${H-14}" font-size="10" text-anchor="middle" class="mut mono">${isDay?DAYS[g/1440]:fmtHM(g)}</text><line x1="${X(g)}" x2="${X(g)}" y1="${T}" y2="${H-Bt}" stroke="var(--grid)"/>`;}
+  s+=`<line x1="${L}" x2="${W-Rr}" y1="${Y(res.D.rop)}" y2="${Y(res.D.rop)}" stroke="var(--crit)" stroke-dasharray="5 4"/><text x="${W-Rr-4}" y="${Y(res.D.rop)-5}" font-size="10" text-anchor="end" style="fill:var(--crit)">trigger ${res.D.rop} pcs</text>`;
+  let lastM,segs=[];
+  for(const sn of res.snaps){if(sn.t<t0||sn.t>t1)continue;const p=sn.pts[ci];const m=p.mat;
+    let v=0;if(p.a&&p.a.m===m)v+=p.a.p;if(p.rs&&p.rs.m===m)v+=p.rs.p;v+=p.co;
+    if(m!==lastM||!segs.length){segs.push({m,pts:[]});lastM=m;}segs[segs.length-1].pts.push([X(sn.t).toFixed(1),Y(Math.min(ymax,v)).toFixed(1)]);}
+  for(const g of segs){if(!g.m||!g.pts.length)continue;const d='M'+g.pts.map(p=>p.join(',')).join('L');
+    s+=`<path d="${d}L${g.pts[g.pts.length-1][0]},${Y(0)}L${g.pts[0][0]},${Y(0)}Z" fill="${matCol(g.m)}" opacity=".14"/><path d="${d}" fill="none" stroke="${matCol(g.m)}" stroke-width="1.8"/>`;
+    if(g.pts.length>10)s+=`<text x="${+g.pts[0][0]+4}" y="${T+11}" font-size="10" class="mono" style="fill:${matCol(g.m)}">${esc(codeOf(g.m))}</text>`;}
+  for(const r of res.reqs){if(r.comp!==compSel||r.type==='RETURN'||r.delivered==null||r.delivered<t0||r.delivered>t1)continue;
+    s+=`<circle cx="${X(r.delivered)}" cy="${H-Bt+6}" r="3.5" fill="${r.type==='CO_IN'?'var(--accent)':'var(--ok)'}" ${r.late?'stroke="var(--crit)" stroke-width="2"':''}><title>#${r.id} ${r.type} delivered ${fmt(r.delivered)}</title></circle>`;}
+  for(const st of res.stopLog){if(st.t<t0||st.t>t1||!st.miss.includes(compSel))continue;s+=`<rect x="${X(st.t)}" y="${T}" width="${Math.max(1,X(st.t+0.5)-X(st.t))}" height="${H-T-Bt}" fill="var(--crit)" opacity=".35"/>`;}
+  if(tSel>=t0&&tSel<=t1){const sn=snapAt(res,tSel);const p=sn.pts[ci];let v=0;if(p.a&&p.a.m===p.mat)v+=p.a.p;if(p.rs&&p.rs.m===p.mat)v+=p.rs.p;v+=p.co;
+    const run=res.runs[sn.r];const using=run&&run.bom&&run.bom[compSel]===p.mat&&(sn.label==='run'||sn.label==='stop'||sn.label==='break');
+    const tts=using?v/res.D.rate:null;
+    s+=`<line x1="${X(tSel)}" x2="${X(tSel)}" y1="${T}" y2="${H-Bt}" stroke="var(--accent)" stroke-width="2"/>`;
+    const tx=Math.min(X(tSel)+6,W-250);
+    s+=`<text x="${tx}" y="${T+26}" font-size="11.5" class="mono" style="paint-order:stroke;stroke:var(--surface);stroke-width:3px">${f0(v)} pcs · ${tts!=null?'stock-out in '+f0(tts)+' min':'not consumed now'}</text>`;}
+  s+=`<text x="${L}" y="${H-1}" font-size="10" class="mut">dots: green = replenishment delivered, amber = pre-staged for changeover</text>`;
+  $('#chart').innerHTML=s;
+}
+function renderPlan(){
+  $('#plan-presets').innerHTML=[['std','Source plan'],['mix','Mix change preset']].map(([k,l])=>`<button aria-pressed="${planName===k}" data-plan="${k}">${l}</button>`).join('');
+  $('#plan-grid').innerHTML=plan.map((day,d)=>{if(!day.length)return '';const tot=day.reduce((s,r)=>s+(+r.q||0),0);
+    return `<div class="day"><div style="display:flex;justify-content:space-between"><b>${DAYS[d]} <span class="muted" style="font-weight:400">· shift ${SHIFTS[d]||'—'}</span></b><span class="num muted" id="tot-${d}">${tot} / cap ${CAP[d]}</span></div>`+
+    day.map((r,i)=>`<div class="run"><span class="k"><span class="num muted">${['I','II','III','IV','V','VI'][i]}</span><span class="swatch" style="background:${VCOL[r.v]}"></span>${esc(r.v)} <span class="muted" style="font-size:.74rem">${esc(r.drive)}${r.pack==='Carton'?' · carton':''}</span></span><input type="number" min="0" step="10" id="q-${d}-${i}" data-d="${d}" data-i="${i}" value="${r.q}" aria-label="${DAYS[d]} ${r.v} quantity"></div>`).join('')+`</div>`;}).join('');
+}
+function matRows(res){
+  const map=new Map();
+  for(const r of res.runs){if(!r.bom)continue;for(const c of COMPS){const m=r.bom[c.id];if(!map.has(m))map.set(m,{m,comp:c.id,q:0,days:new Array(8).fill(0),vars:new Set()});const o=map.get(m);o.q+=r.q;o.days[r.day]+=r.q;o.vars.add(r.v);}}
+  return [...map.values()].sort((a,b)=>COMPS.findIndex(c=>c.id===a.comp)-COMPS.findIndex(c=>c.id===b.comp)||a.m.localeCompare(b.m));
+}
+function renderMat(res){
+  const D=res.D;
+  $('#formula').textContent=
+`consumption while running   d = JPH × 1 pc/unit = ${P.jph} pcs/h = ${D.rate.toFixed(3)} pcs/min
+AMR travel                  ${P.dist} m ÷ (${P.speed} km/h = ${f1(P.speed*1000/60)} m/min) = ${f1(D.travel)} min
+nominal lead time           LT_nom  = prep ${f1(D.prep)} + load ${P.handling} + travel ${f1(D.travel)} + known extra ${f1(D.kd)} + unload ${P.handling} = ${f1(D.ltNom)} min
+AMR cycle (with returns)    cycle   = 4 × ${P.handling} + 2 × ${f1(D.travel)} + ${f1(D.kd)} = ${f1(D.cycle)} min
+planning lead time          LT_plan = LT_nom + one cycle waiting for a free AMR = ${f1(D.ltPlan)} min
+demand during LT            d × LT_plan = ${f1(D.dLT)} pcs
+safety stock (${P.service} %)  SS = z × d × CV × LT_plan = ${D.z.toFixed(3)} × ${D.rate.toFixed(3)} × ${P.ltCv} × ${f1(D.ltPlan)} = ${f1(D.ss)} pcs
+trigger (Min, pcs)          ROP = ⌈d × LT_plan + SS⌉ = ${D.rop} pcs → AMR request when line-side stock + stock on the way ≤ ROP
+štaple                      Min = ⌈ROP ÷ pcs per štapel⌉,  Max = Min + 1 štapel (order lot) → positions per consumption point = Max
+run-out rule                no replenishment if line-side stock already covers the rest of the run → fewer partial returns at changeover`;
+  const rows=matRows(res);
+  $('#mat-table').innerHTML=`<thead><tr><th>Material</th><th>Variants</th><th class="n">Pcs / štapel</th><th class="n">Week demand</th><th class="n">Štaple / week</th><th class="n">Peak day štaple</th><th class="n">Štapel lasts (min)</th><th class="n">Demand in LT</th><th class="n">SS</th><th class="n">ROP pcs</th><th class="n">Min</th><th class="n">Max</th><th class="n">Existing SM štaple</th><th class="n">Existing SM covers</th></tr></thead><tbody>`+
+  rows.map(o=>{const pcs=PCS[o.comp];const mm=stacksMinMax(pcs,D.rop);const st=Math.ceil(o.q/pcs);const pk=Math.max(...o.days.map(q=>Math.ceil(q/pcs)));const ex=EXIST[o.m]??0;const cov=ex*pcs/o.q;
+    return `<tr><td><span class="swatch" style="background:${matCol(o.m)}"></span><span class="num">${esc(o.m)}</span></td><td class="muted">${[...o.vars].join(', ')}</td><td class="n">${pcs}</td><td class="n">${f0(o.q)}</td><td class="n">${st}</td><td class="n">${pk}</td><td class="n">${f0(pcs/D.rate)}</td><td class="n">${f1(D.dLT)}</td><td class="n">${f1(D.ss)}</td><td class="n">${D.rop}</td><td class="n">${mm.min}</td><td class="n">${mm.max}</td><td class="n">${ex}</td><td class="n"><span class="pill ${cov>=1?'p3':cov>=0.5?'p2':'p1'}">${cov>=10?'>10':f1(cov)} wk</span></td></tr>`;}).join('')+'</tbody>';
+}
+function renderSize(res){
+  const k=res.kpi;const slots=COMPS.map(c=>maxStacksFor(res,c.id));const pointPos=slots.reduce((a,b)=>a+b,0);
+  const coPos=Math.max(k.coPeak,1);const retPos=Math.max(k.outPeak,1);const total=pointPos+coPos+retPos;
+  const fp=P.footL*P.footW;const net=total*fp;
+  const rowLen=COMPS.length*(P.footW+0.2);const depth1=Math.max(...slots)*(P.footL+0.1);const zoneLen=Math.ceil(coPos/2)*(P.footW+0.2)+0.6+Math.ceil(retPos/2)*(P.footW+0.2);
+  const len=Math.max(rowLen,zoneLen);const depth2=2*(P.footL+0.1);const gross=len*(depth1+P.aisle+depth2);
+  const amrH=COMPS.reduce((s,c)=>s+P.jph/c.pcs,0);
+  const bigCo=res.coLog.filter(c=>c.from&&c.changed.length).sort((a,b)=>b.changed.length-a.changed.length)[0];const nCo=bigCo?bigCo.changed.length:0;
+  $('#size-table').innerHTML=`<thead><tr><th>Zone</th><th class="n">Positions</th><th>Basis</th></tr></thead><tbody>
+  <tr><td>Consumption points (${COMPS.length} components)</td><td class="n">${pointPos}</td><td class="muted">Σ Max štaple per component (active + reserve)</td></tr>
+  <tr><td>Changeover positions</td><td class="n">${coPos}</td><td class="muted">simulated peak · configured ${P.coCap}${k.overflow?` · <b style="color:var(--crit)">over by ${k.overflow}</b>`:''}</td></tr>
+  <tr><td>Empty baskets &amp; partial returns</td><td class="n">${retPos}</td><td class="muted">simulated peak waiting for AMR pick-up</td></tr>
+  <tr><td><b>Total Line 2 supermarket</b></td><td class="n"><b>${total}</b></td><td class="muted">štapel positions</td></tr>
+  <tr><td>Net floor area</td><td class="n">${f1(net)} m²</td><td class="muted">${total} × ${P.footL} × ${P.footW} m</td></tr>
+  <tr><td>Gross area with AMR aisle</td><td class="n">${f1(gross)} m²</td><td class="muted">${f1(len)} m × ${f1(depth1+P.aisle+depth2)} m</td></tr></tbody>`;
+  $('#size-formula').textContent=
+`steady AMR load at ${P.jph} JPH
+  štaple/h  = Σ JPH ÷ pcs per štapel = ${f1(amrH)} full in, ${f1(amrH)} empty out
+  trips/h   = ${f1(amrH)} ÷ 2 per trip = ${f1(amrH/2)}  (empties ride back)
+  AMR min/h = ${f1(amrH/2)} × ${f1(res.D.cycle)} = ${f0(amrH/2*res.D.cycle)} min → ${pct(amrH/2*res.D.cycle/60,0)} of one AMR
+
+largest changeover in this plan: ${bigCo?esc(bigCo.from)+' → '+esc(bigCo.to)+', n = '+nCo+' materials':'none'}
+  pre-stage lead = LT_plan + ⌈n ÷ (2 × AMRs)⌉ × cycle + reserve
+                 = ${f1(res.D.ltPlan)} + ${Math.ceil(nCo/(2*res.P.nAmr))} × ${f1(res.D.cycle)} + ${P.prepBuffer} = ${f0(res.D.ltPlan+Math.ceil(nCo/(2*res.P.nAmr))*res.D.cycle+P.prepBuffer)} min before changeover start
+
+layout geometry
+  one row of ${COMPS.length} consumption points along the line, ${Math.max(...slots)} deep
+  AMR aisle ${P.aisle} m, then changeover and return positions facing it
+  štapel footprint ${P.footL} × ${P.footW} m (trolley TM00171, Baskets dimensions sheet)`;
+}
+function coInfo(res,c){
+  const rq=res.reqs.filter(r=>r.type==='CO_IN'&&r.run===c.run);const ret=res.reqs.filter(r=>r.type==='RETURN'&&r.co===c.run);
+  const first=rq.length?Math.min(...rq.map(r=>r.created)):null;
+  const lastNew=rq.length?Math.max(...rq.map(r=>r.delivered??Infinity)):null;
+  const removed=ret.length?Math.max(...ret.map(r=>r.delivered??Infinity)):null;
+  const coEnd=c.t+res.P.coTime;
+  return {rq,ret,first,lastNew,removed,coEnd,reserve:lastNew!=null&&isFinite(lastNew)?c.t-lastNew:null,
+    staged:rq.filter(r=>r.placed==='point (pre-staged)').length,late:rq.filter(r=>r.late).length};
+}
+function renderCO(res){
+  const rows=res.coLog.filter(c=>c.changed.length).map((c,idx)=>{const I=coInfo(res,c);
+    const ok=!I.late&&I.reserve!=null&&I.reserve>=0;
+    return `<tr data-t="${c.t}" data-co="${c.t}" style="cursor:pointer"><td class="num">${fmt(c.t)}</td><td>${c.from?esc(c.from):'(empty line)'} → <b>${esc(c.to)}</b></td><td class="n">${c.changed.length}</td><td class="muted" style="white-space:normal;min-width:170px">${c.changed.join(', ')}</td>
+      <td class="num">${I.first!=null?fmtHM(I.first):'—'}</td><td class="n">${I.first!=null?f0(c.t-I.first)+' min':'—'}</td>
+      <td class="num">${I.lastNew!=null&&isFinite(I.lastNew)?fmtHM(I.lastNew):'—'}</td><td class="n">${I.reserve!=null?f0(I.reserve)+' min':'—'}</td>
+      <td class="num">${fmtHM(c.t)}–${fmtHM(I.coEnd)}</td>
+      <td class="n">${I.ret.length}</td><td class="num">${I.removed!=null&&isFinite(I.removed)?fmtHM(I.removed):'—'}</td>
+      <td class="n">${I.staged} / ${I.rq.length-I.staged}</td>
+      <td><span class="pill ${I.late?'p1':ok?'p3':'p2'}">${I.late?I.late+' late':ok?'ready before stop':'ready in window'}</span></td></tr>`;}).join('');
+  $('#co-table').innerHTML=`<thead><tr><th>Start</th><th>From → to</th><th class="n">Materials</th><th>Changed components</th><th>Pre-stage from</th><th class="n">Lead</th><th>New material in place</th><th class="n">Reserve</th><th>Line stop (changeover)</th><th class="n">Štaple out</th><th>Removal done</th><th class="n">At point / CO pos.</th><th>Status</th></tr></thead><tbody>${rows}</tbody>`;
+}
+let coSel=null;
+function renderCODetail(res){
+  const list=res.coLog.filter(c=>c.changed.length);
+  if(!list.length){$('#co-gantt').innerHTML='';return;}
+  let c=list.find(x=>x.t===coSel);
+  if(!c){c=list.filter(x=>x.from).sort((a,b)=>b.changed.length-a.changed.length||a.t-b.t)[0]||list[0];coSel=c.t;}
+  $('#co-sel').innerHTML=list.map(x=>`<option value="${x.t}" ${x.t===c.t?'selected':''}>${fmt(x.t)} · ${x.from?esc(x.from):'empty'} → ${esc(x.to)} · ${x.changed.length} mat.</option>`).join('');
+  const I=coInfo(res,c);const co=res.P.coTime;
+  const tA=Math.min(I.first??c.t,c.t)-10,tB=Math.max(isFinite(I.removed)?I.removed:c.t+co,c.t+co)+10;
+  const W=1200,L=150,Rr=14,rows=c.changed;const rh=26,top=46,H=top+rows.length*rh+30;
+  const X=t=>L+(t-tA)/(tB-tA)*(W-L-Rr);
+  const svg=$('#co-gantt');svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  let s=`<defs><pattern id="hatch2" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="var(--surface-2)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--muted)" stroke-width="2"/></pattern></defs>`;
+  const band=(t0,t1,fill,label)=>{if(t1<=t0)return;s+=`<rect x="${X(t0)}" y="${top-26}" width="${X(t1)-X(t0)}" height="${H-top+20}" fill="${fill}" opacity=".55"/><text x="${X(t0)+5}" y="${top-12}" font-size="11" style="font-weight:600">${label}</text>`;};
+  band(I.first??c.t,c.t,'var(--accent-soft)','BEFORE · pre-stage');
+  band(c.t,c.t+co,'url(#hatch2)','DURING · line stop');
+  band(c.t+co,isFinite(I.removed)?I.removed:c.t+co,'var(--surface-2)','AFTER · removal');
+  const step=(tB-tA)>240?30:(tB-tA)>120?15:10;
+  for(let g=Math.ceil(tA/step)*step;g<=tB;g+=step){s+=`<line x1="${X(g)}" x2="${X(g)}" y1="${top-2}" y2="${H-22}" stroke="var(--grid)"/><text x="${X(g)}" y="${H-8}" font-size="10" text-anchor="middle" class="mut mono">${fmtHM(g)}</text>`;}
+  rows.forEach((id,i)=>{const y=top+i*rh;
+    s+=`<text x="6" y="${y+16}" font-size="11.5" style="font-weight:600">${esc(id)}</text>`;
+    const rIn=I.rq.find(r=>r.comp===id);const rOut=I.ret.filter(r=>r.comp===id);
+    if(rIn){const x0=X(rIn.created),x1=X(rIn.delivered??tB);
+      s+=`<rect x="${x0}" y="${y+3}" width="${Math.max(2,x1-x0)}" height="9" rx="2" fill="var(--accent)"><title>#${rIn.id} new ${esc(rIn.mat)}: requested ${fmtHM(rIn.created)}, AMR ${rIn.amr??'—'} at ${rIn.dispatched!=null?fmtHM(rIn.dispatched):'—'}, in place ${rIn.delivered!=null?fmtHM(rIn.delivered):'—'} (${esc(rIn.placed||'')})</title></rect>`;
+      if(rIn.dispatched!=null)s+=`<rect x="${X(rIn.dispatched)}" y="${y+3}" width="${Math.max(1,x1-X(rIn.dispatched))}" height="9" fill="var(--ink)" opacity=".35"/>`;
+      s+=`<text x="${x1+4}" y="${y+12}" font-size="9.5" class="mono mut">${esc(codeOf(rIn.mat))} → ${rIn.placed==='point (pre-staged)'?'point':'CO pos.'}</text>`;}
+    rOut.forEach((r,j)=>{const x0=X(r.created),x1=X(r.delivered??tB);
+      s+=`<rect x="${x0}" y="${y+14+j*0}" width="${Math.max(2,x1-x0)}" height="8" rx="2" fill="var(--muted)" opacity="${.5+.25*j}"><title>#${r.id} ${r.kind==='EMPTY'?'empty basket':'partial '+f0(r.left)+' pcs'} ${esc(r.mat)}: out ${fmtHM(r.created)}, picked ${r.dispatched!=null?fmtHM(r.dispatched):'—'}, back in SM ${r.delivered!=null?fmtHM(r.delivered):'—'}</title></rect>`;});
+  });
+  s+=`<line x1="${X(c.t)}" x2="${X(c.t)}" y1="${top-26}" y2="${H-22}" stroke="var(--crit)" stroke-width="1.5"/><line x1="${X(c.t+co)}" x2="${X(c.t+co)}" y1="${top-26}" y2="${H-22}" stroke="var(--ok)" stroke-width="1.5"/>`;
+  svg.innerHTML=s;
+  const n=c.changed.length,trips=new Set(I.rq.map(r=>r.dispatched+'|'+r.amr)).size;
+  $('#co-summary').innerHTML=`<b>Before:</b> ${n} pre-stage requests from ${I.first!=null?fmtHM(I.first):'—'} (${I.first!=null?f0(c.t-I.first):'—'} min ahead), ${trips} AMR trips; ${I.staged} štaple go straight to the free reserve slot, ${I.rq.length-I.staged} to changeover positions. Last new štapel in place ${I.lastNew!=null&&isFinite(I.lastNew)?fmtHM(I.lastNew):'—'}, <b>${I.reserve!=null?f0(I.reserve):'—'} min</b> before the stop. `+
+   `<b>During:</b> line stops ${fmtHM(c.t)}–${fmtHM(c.t+co)}; operator swaps ${n} points, ${I.ret.length} old štaple move to return positions. `+
+   `<b>After:</b> removal finished ${I.removed!=null&&isFinite(I.removed)?fmtHM(I.removed):'—'}, riding back on the delivery trips of the next replenishments. Yellow bar = request open, dark overlay = AMR on the way, grey = old štapel waiting for pick-up and on the way back.`;
+  const ev=[];
+  for(const r of I.rq){ev.push([r.created,'Pre-stage request',r,'—']);if(r.dispatched!=null)ev.push([r.dispatched,'AMR leaves existing SM',r,'AMR '+r.amr]);if(r.delivered!=null)ev.push([r.delivered,'Delivered → '+(r.placed||''),r,'AMR '+r.amr]);}
+  for(const r of I.ret){ev.push([r.created,r.kind==='EMPTY'?'Empty basket to return position':'Partial štapel ('+f0(r.left)+' pcs) to return position',r,'operator']);if(r.dispatched!=null)ev.push([r.dispatched,'Picked up at Line 2',r,'AMR '+r.amr]);if(r.delivered!=null)ev.push([r.delivered,'Back in existing SM',r,'AMR '+r.amr]);}
+  ev.sort((a,b)=>a[0]-b[0]);
+  const ph=t=>t<c.t-1e-6?['Before','p2']:t<c.t+co-1e-6?['During','p1']:['After','p4'];
+  $('#co-events').innerHTML=`<thead><tr><th>Phase</th><th>Time</th><th>Event</th><th>Material</th><th>Who</th></tr></thead><tbody>`+ev.map(([t,e,r,w])=>{const[p,cl]=ph(t);return `<tr><td><span class="pill ${cl}">${p}</span></td><td class="num">${fmtHM(t)}</td><td>${esc(e)}</td><td class="num">${esc(r.mat)}</td><td class="muted">${w}</td></tr>`;}).join('')+'</tbody>';
+}
+function renderShift(res){
+  const ds=res.P.dayStart*60,shiftOf=t=>Math.floor((t-ds)/720),lab=k=>DAYS[Math.floor(k/2)]+(k%2?' N':' D');
+  const cols=Object.keys(res.prodS).map(Number).filter(k=>res.prodS[k]>0.5).sort((a,b)=>a-b);
+  const del={};for(const r of res.reqs){if((r.type==='REPL'||r.type==='CO_IN')&&r.delivered!=null){const k=shiftOf(r.delivered);(del[k]??={})[r.mat]=(del[k][r.mat]||0)+1;}}
+  const mats=matRows(res).map(o=>o.m);const mx=m=>maxStacksFor(res,m.split(' ')[0]);
+  const inUse=k=>mats.filter(m=>(res.cons[k]||{})[m]>0.01);
+  let h=`<thead><tr><th>Material</th>${cols.map(k=>`<th class="n">${lab(k)}</th>`).join('')}</tr></thead><tbody>`;
+  for(const m of mats){h+=`<tr><td><span class="swatch" style="background:${matCol(m)}"></span><span class="num">${esc(m)}</span></td>`+cols.map(k=>{const cq=(res.cons[k]||{})[m]||0,d=(del[k]||{})[m]||0;
+    return `<td class="n" style="${cq>0.01?'background:var(--accent-soft)':''}" title="${f0(cq)} pcs consumed">${d||(cq>0.01?'·':'')}</td>`;}).join('')+`</tr>`;}
+  const sumRow=(label,fn,bold)=>`<tr><td>${bold?'<b>'+label+'</b>':label}</td>${cols.map(k=>`<td class="n">${bold?'<b>'+fn(k)+'</b>':fn(k)}</td>`).join('')}</tr>`;
+  h+=sumRow('Transmissions built',k=>f0(res.prodS[k]||0));
+  h+=sumRow('Materials in use',k=>inUse(k).length);
+  h+=sumRow('Štaple delivered',k=>Object.values(del[k]||{}).reduce((a,b)=>a+b,0));
+  h+=sumRow('AMR trips',k=>res.tripsS[k]||0);
+  h+=sumRow('Positions · fixed slot per material',k=>inUse(k).reduce((a,m)=>a+mx(m),0));
+  h+=sumRow('Positions · shared slots (simulated peak)',k=>res.peakS[k]||0,true);
+  $('#shift-table').innerHTML=h+'</tbody>';
+  const fixedMax=Math.max(...cols.map(k=>inUse(k).reduce((a,m)=>a+mx(m),0)));const flexMax=Math.max(...cols.map(k=>res.peakS[k]||0));
+  const all=mats.reduce((a,m)=>a+mx(m),0);
+  $('#shift-note').textContent=`Size follows the plan: a shift with one variant needs ${COMPS.length} materials, a shift with a 56 ↔ 46 changeover up to ${Math.max(...cols.map(k=>inUse(k).length))}. With a fixed slot per material the supermarket would need ${fixedMax} positions in the worst shift (${all} to hold every material of the week). With shared slots at the ${COMPS.length} consumption points plus changeover and return positions it needs ${flexMax}. Switch to the Mix change scenario to see the effect of more 46 N2.`;
+}
+function ptAlong(poly,f){f=Math.max(0,Math.min(1,f));const seg=[];let Ltot=0;for(let i=1;i<poly.length;i++){const d=Math.hypot(poly[i][0]-poly[i-1][0],poly[i][1]-poly[i-1][1]);seg.push(d);Ltot+=d;}
+  let x=f*Ltot;for(let i=0;i<seg.length;i++){if(x<=seg[i]||i===seg.length-1){const r=seg[i]?Math.min(1,x/seg[i]):0;return[poly[i][0]+(poly[i+1][0]-poly[i][0])*r,poly[i][1]+(poly[i+1][1]-poly[i][1])*r];}x-=seg[i];}return poly[poly.length-1];}
+function renderFlow(res){
+  const sn=snapAt(res,tSel);if(!sn)return;
+  const OUT=[[485,300],[485,286],[800,286],[800,140],[540,140],[540,124]];
+  const RET=[[540,124],[540,140],[140,140],[140,286],[470,286],[470,300]];
+  const pl=a=>a.map(p=>p.join(',')).join(' ');
+  let s=`<defs><marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="var(--ink)"/></marker><marker id="arr2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="var(--muted)"/></marker></defs>`;
+  s+=`<rect x="20" y="16" width="860" height="350" rx="6" fill="var(--surface-2)" stroke="var(--line)"/>`;
+  s+=`<rect x="170" y="44" width="600" height="68" fill="var(--surface)" stroke="var(--line)"/><text x="190" y="72" font-size="14" style="font-weight:600">Assy 2</text><text x="190" y="90" font-size="10.5" class="mut">assembly line 2 · 55 JPH</text>`;
+  s+=`<rect x="440" y="104" width="200" height="14" fill="var(--accent)"/><text x="645" y="100" font-size="10.5" style="font-weight:600">Supermarket na linke 2</text><text x="645" y="88" font-size="9.5" class="mut">${COMPS.length} consumption points + CO + returns</text>`;
+  s+=`<rect x="170" y="160" width="600" height="110" fill="var(--surface)" stroke="var(--line)"/><text x="190" y="190" font-size="14" style="font-weight:600">Assy 1</text>`;
+  s+=`<rect x="390" y="300" width="190" height="44" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/><text x="485" y="322" font-size="12" text-anchor="middle" style="font-weight:600">Existujúci supermarket</text><text x="485" y="337" font-size="9.5" text-anchor="middle" class="mut">G&amp;S baskets · source</text>`;
+  s+=`<polyline points="${pl(OUT)}" fill="none" stroke="var(--ink)" stroke-width="3" marker-end="url(#arr)"/>`;
+  s+=`<polyline points="${pl(RET)}" fill="none" stroke="var(--muted)" stroke-width="3" stroke-dasharray="7 5" marker-end="url(#arr2)"/>`;
+  s+=`<text x="808" y="216" font-size="10.5" class="mono">full · ≈${res.P.dist} m</text><text x="60" y="216" font-size="10.5" class="mono mut">return · ≈${res.P.dist} m</text>`;
+  s+=`<text x="640" y="280" font-size="9.5" class="mut">→ one-way loop</text>`;
+  sn.amr.forEach((a,i)=>{let p;
+    if(a.s==='to line')p=ptAlong(OUT,a.f);else if(a.s==='at line')p=OUT[OUT.length-1];else if(a.s==='to SM')p=ptAlong(RET,1-a.f);else p=[455+i*40,355];
+    const fill=a.down?'var(--crit)':a.s==='idle'?'var(--muted)':'var(--ink)';
+    s+=`<g><rect x="${p[0]-17}" y="${p[1]-8}" width="34" height="16" rx="4" fill="${fill}" stroke="var(--surface)" stroke-width="1.5"/><text x="${p[0]}" y="${p[1]+4}" font-size="9" text-anchor="middle" style="fill:var(--surface);font-weight:600">AMR ${i+1}</text>`;
+    for(let j=0;j<a.load;j++)s+=`<rect x="${p[0]-15+j*16}" y="${p[1]-15}" width="14" height="6" fill="var(--accent)"/>`;
+    for(let j=0;j<a.ret;j++)s+=`<rect x="${p[0]-15+j*16}" y="${p[1]-15}" width="14" height="6" fill="var(--muted)"/>`;
+    s+=`<title>AMR ${i+1}: ${a.down?'down':a.s}</title></g>`;});
+  $('#flow').innerHTML=s;
+  const toLine=sn.amr.reduce((x,a)=>x+a.load,0),back=sn.amr.reduce((x,a)=>x+a.ret,0);
+  const reqById=new Map(res.reqs.map(r=>[r.id,r]));const openDel=sn.open.map(id=>reqById.get(id)).filter(r=>r&&r.type!=='RETURN'&&r.dispatched==null).length;
+  $('#flow-side').innerHTML=[['Full štaple on the way to Line 2',toLine],['Empty / partial štaple on the way back',back],['Requests waiting for a free AMR',openDel],['Štaple waiting at Line 2 for pick-up',sn.out.length],['AMR state',sn.amr.map((a,i)=>`AMR ${i+1}: ${a.down?'down':a.s}`).join('<br>')]]
+    .map(([l,v])=>`<div class="kpi"><span class="l">${l}</span><span class="v" style="font-size:1.1rem">${v}</span></div>`).join('');
+  $('#clock3').textContent=fmt(tSel);
+}
+function renderReq(res){
+  const [t0,t1]=zoomRange(res);
+  $('#req-filter').innerHTML=[['all','All'],['REPL','Replenishment'],['CO_IN','Changeover'],['RETURN','Returns'],['late','Late / P1']].map(([k,l])=>`<button aria-pressed="${reqFilter===k}" data-f="${k}">${l}</button>`).join('');
+  let list=res.reqs.filter(r=>r.created>=t0-60&&r.created<=t1);
+  if(reqFilter==='late')list=list.filter(r=>r.late||r.prio==='P1');else if(reqFilter!=='all')list=list.filter(r=>r.type===reqFilter);
+  const rows=list.slice(0,400).map(r=>{const lead=r.delivered!=null?r.delivered-r.created:null;
+    return `<tr data-t="${r.created}" style="cursor:pointer"><td class="n">${r.id}</td><td><span class="pill t-${r.type}">${r.type==='CO_IN'?'CHANGEOVER':r.type}</span></td><td class="num">${esc(r.mat)}</td><td class="muted">${r.type==='RETURN'?(r.kind==='EMPTY'?'Line 2 → existing SM · empty':'Line 2 → existing SM · '+f0(r.left)+' pcs'):'existing SM → '+(r.placed||'Line 2')}</td>
+    <td class="num">${fmt(r.created)}</td><td class="num">${r.type==='RETURN'?'—':fmtHM(r.due)}</td><td>${r.prio?`<span class="pill ${r.prio.toLowerCase()}">${r.prio}</span>`:''}</td><td class="n">${r.amr??'—'}</td><td class="num">${r.dispatched!=null?fmtHM(r.dispatched):'—'}</td><td class="num">${r.delivered!=null?fmtHM(r.delivered):'—'}</td><td class="n">${lead!=null?f1(lead):'—'}</td><td>${r.late?'<span class="pill p1">late</span>':''}</td></tr>`;}).join('');
+  $('#req-table').innerHTML=`<thead><tr><th class="n">#</th><th>Type</th><th>Material</th><th>Route</th><th>Created</th><th>Due</th><th>Priority</th><th class="n">AMR</th><th>Dispatched</th><th>Done</th><th class="n">Min</th><th></th></tr></thead><tbody>${rows||'<tr><td colspan="12" class="muted">No requests in this range.</td></tr>'}</tbody>`;
+}
+function renderBOM(){
+  const vs=INP?Object.keys(INP.bom):['56 C2','56 H2','56 M2','56 N2','55 N2','46 N2'];
+  $('#bom-table').innerHTML=`<thead><tr><th>Variant</th>${COMPS.map(c=>`<th>${c.id}</th>`).join('')}</tr></thead><tbody>`+
+   vs.map(v=>{const b=bomOf(v);return `<tr><td><span class="swatch" style="background:${VCOL[v]}"></span><b>${v}</b></td>${COMPS.map(c=>{const m=b[c.id];return m?`<td><span class="swatch" style="background:${matCol(m)}"></span><span class="num">${codeOf(m)}</span></td>`:'<td class="muted">—</td>';}).join('')}</tr>`;}).join('')+
+   `<tr><td><span class="swatch" style="background:var(--cInv)"></span><b>INV D3.6</b></td><td colspan="${COMPS.length}" class="muted" style="white-space:normal">Inverter, no G&amp;S material. Consumption points keep their material during the run.</td></tr></tbody>`;
+  $('#bom-note').textContent=`${COMPS.length} components per transmission, 1 piece each. Line 2 runs only 56 C2 / H2 / M2 / N2 and 46 N2 (plus the inverter INV D3.6, which uses no G&S material). The 34 / 35 rows use 2_34 / 2_35 codes that have no active stock, and the 55 N2 row has no G3, G5 and G7; neither affects Line 2. The mapping is a team input and has to be confirmed with the organisers.`;
+}
+function renderAssume(){
+  const D=derived(P);
+  const items=[
+   `<b>Bill of materials.</b> From the Prevodník sheet: ${COMPS.length} components (${COMPS.map(c=>c.id).join(', ')}), 1 piece each per transmission. G1 and G2/Rev have stock in the existing supermarket but no column in Prevodník, so they are not supplied to Line 2 here. Confirm with the organisers.`,
+   `<b>Shift model.</b> Taken from the plan: D = day shift from ${pad(P.dayStart)}:00, N = night shift from ${pad(P.dayStart+12)}:00, D+N = both (Thursday is night only). 55 JPH net while running, 30 min break in the middle of each 12 h shift.`,
+   `<b>Changeover.</b> 20 min line stop whenever the transmission type changes (packaging changes do not count). G&amp;S material is swapped at the start of the window; a changeover at the start of a production day happens before the shift starts.`,
+   `<b>Inverter run (INV D3.6).</b> Uses no G&amp;S material; consumption points keep the previous material.`,
+   `<b>AMR.</b> ${P.speed} km/h, ${P.dist} m one way, ${P.handling} min per load or unload stop, max 2 štaple. A request can leave only after ${P.prep} min of preparation in the existing supermarket. Full štaple go to the line; empties and partial štaple ride back on the return leg. One cycle = ${f1(D.cycle)} min.`,
+   `<b>Lead time for triggers.</b> LT_plan = nominal delivery (${f1(D.ltNom)} min incl. preparation) + one full AMR cycle of waiting = ${f1(D.ltPlan)} min. Safety stock covers ${P.service} % with lead-time CV ${P.ltCv}. Known changes (speed, distance, handling, fleet, known delay) flow into the trigger automatically; the "AMR delay, unplanned" scenario is deliberately not known to it.`,
+   `<b>Priority.</b> Requests are served by time to stock-out (replenishment) or time to changeover start (pre-stage). P1 = would arrive after stock-out, P2 = less than one LT_plan of slack, P3 = normal, P4 = returns.`,
+   `<b>Štapel.</b> Trolley 80 °C (TM00171) from the Baskets dimensions sheet: 630 × 430 mm, basket height 135 mm, 10.3 kg. One štapel = one trolley stack, one position. Gaps of 0.1–0.2 m between positions are assumed.`,
+   `<b>Existing supermarket</b> is the source and is not a constraint in the simulation. Its current stock covers only about 1 week of Line 2 demand for most 56 materials, and Line 1 draws on the same materials. This must be checked.`,
+   `<b>Partial štaple</b> go back to the existing supermarket at changeover. Keeping them at Line 2 when the same material comes back within the shift (Saturday H2 → M2 → H2) would save trips and is a next step.`,
+   `<b>Risks.</b> 56 ↔ 46 changeovers swap 7 of ${COMPS.length} components at once and need 4 AMR trips plus the same number of returns. Unplanned AMR delay and simultaneous drops below the trigger with one AMR are the main threats (see scenarios). G6 2_46 and G7 2_46 have the thinnest existing stock.`,
+   `<b>Out of scope</b> (per task): AMR hardware, sensors, ERP/WMS/MES integration. In operation the trigger would come from a pick confirmation or a scale at the consumption point.`];
+  $('#assume').innerHTML=items.map(i=>`<li>${i}</li>`).join('');
+}
+function renderAll(){
+  const res=results[current];
+  renderScenarios();renderKPI(res);renderGantt(res);renderLayout(res);renderFlow(res);renderChart(res);renderMat(res);renderSize(res);renderShift(res);renderCO(res);renderCODetail(res);renderReq(res);
+  const sl=$('#tslider');sl.max=String(8*1440);sl.value=String(tSel);
+}
+function setT(t){tSel=Math.max(0,Math.round(t/5)*5);const res=results[current];$('#tslider').value=String(tSel);renderGantt(res);renderLayout(res);renderFlow(res);renderChart(res);}
+function recompute(){runAll();renderAll();}
+
+/* ---------------- EVENTS ---------------- */
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-s]');if(b){current=b.dataset.s;renderAll();return;}
+  const z=e.target.closest('[data-z]');if(z){zoom=z.dataset.z;const res=results[current];const[t0,t1]=zoomRange(res);if(tSel<t0||tSel>t1)tSel=Math.round((t0+120)/5)*5;renderAll();return;}
+  const f=e.target.closest('[data-f]');if(f){reqFilter=f.dataset.f;renderReq(results[current]);return;}
+  const pl=e.target.closest('[data-plan]');if(pl){planName=pl.dataset.plan;plan=JSON.parse(JSON.stringify(planName==='mix'?PLAN_MIX:PLAN_STD));renderPlan();recompute();return;}
+  const cr=e.target.closest('tr[data-co]');if(cr){coSel=+cr.dataset.co;renderCODetail(results[current]);}
+  const tr=e.target.closest('tr[data-t]');if(tr){setT(+tr.dataset.t);document.getElementById('layout').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});}
+});
+let deb;
+document.addEventListener('input',e=>{
+  const el=e.target;
+  if(el.id==='tslider'){setT(+el.value);return;}
+  if(el.dataset.k){const v=parseFloat(el.value);if(!isFinite(v)||(v<0)||(v===0&&!['prepBuffer','knownDelay','prep'].includes(el.dataset.k)))return;P[el.dataset.k]=v;if(el.dataset.k==='nAmr')P.nAmr=Math.max(1,Math.round(v));}
+  else if(el.dataset.d!=null){const d=+el.dataset.d;plan[d][+el.dataset.i].q=Math.max(0,Math.round(+el.value||0));const tot=$('#tot-'+d);if(tot)tot.textContent=plan[d].reduce((s,r)=>s+r.q,0)+' / cap '+CAP[d];}
+  else return;
+  clearTimeout(deb);deb=setTimeout(recompute,250);
+});
+$('#comp-sel').innerHTML=COMPS.map(c=>`<option value="${c.id}" ${c.id===compSel?'selected':''}>${c.id} · ${c.pcs} pcs/štapel</option>`).join('');
+$('#comp-sel').addEventListener('change',e=>{compSel=e.target.value;renderChart(results[current]);});
+$('#co-sel').addEventListener('change',e=>{coSel=+e.target.value;renderCODetail(results[current]);});
+$('#play').addEventListener('click',()=>{
+  const btn=$('#play');
+  if(playing){clearInterval(playing);playing=null;btn.setAttribute('aria-pressed','false');btn.textContent='Play';return;}
+  btn.setAttribute('aria-pressed','true');btn.textContent='Pause';
+  playing=setInterval(()=>{const res=results[current];const[t0,t1]=zoomRange(res);let n=tSel+10;if(n>t1)n=t0;setT(n);},80);
+});
+
+/* ---------------- BOOT ---------------- */
+renderParams();renderPlan();renderBOM();renderAssume();
+runAll();
+{const res=results[current];const big=res.coLog.filter(c=>c.from&&c.changed.length).sort((a,b)=>b.changed.length-a.changed.length||a.t-b.t)[0];tSel=big?Math.round((big.t-20)/5)*5:2160;}
+renderAll();
+</script>
