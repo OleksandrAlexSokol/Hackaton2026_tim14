@@ -789,7 +789,7 @@ function renderCO(res){
       <td class="n">${I.ret.length}</td><td class="num">${I.removed!=null&&isFinite(I.removed)?fmtHM(I.removed):'—'}</td>
       <td class="n">${I.staged} / ${I.rq.length-I.staged}</td>
       <td><span class="pill ${I.late?'p1':ok?'p3':'p2'}">${I.late?I.late+' late':ok?'ready before stop':'ready in window'}</span></td></tr>`;}).join('');
-  $('#co-table').innerHTML=`<thead><tr><th>Start</th><th>From → to</th><th class="n">Materials</th><th>Changed components</th><th>Pre-stage from</th><th class="n">Lead</th><th>New material in place</th><th class="n">Reserve</th><th>Line stop (changeover)</th><th class="n">Štaple out</th><th>Removal done</th><th class="n">At point / CO pos.</th><th>Status</th></tr></thead><tbody>${rows}</tbody>`;
+  $('#co-table').innerHTML=`<thead><tr><th>Start</th><th>From → to</th><th class="n">Materials</th><th>Changed components</th><th>Pre-stage from</th><th class="n">Lead</th><th>New material in place</th><th class="n">Reserve</th><th>Changeover window</th><th class="n">Štaple out</th><th>Removal done</th><th class="n">At point / CO pos.</th><th>Status</th></tr></thead><tbody>${rows}</tbody>`;
 }
 let coSel=null;
 function renderCODetail(res){
@@ -806,7 +806,7 @@ function renderCODetail(res){
   let s=`<defs><pattern id="hatch2" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="var(--surface-2)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--muted)" stroke-width="2"/></pattern></defs>`;
   const band=(t0,t1,fill,label)=>{if(t1<=t0)return;s+=`<rect x="${X(t0)}" y="${top-26}" width="${X(t1)-X(t0)}" height="${H-top+20}" fill="${fill}" opacity=".55"/><text x="${X(t0)+5}" y="${top-12}" font-size="11" style="font-weight:600">${label}</text>`;};
   band(I.first??c.t,c.t,'var(--accent-soft)','BEFORE · pre-stage');
-  band(c.t,c.t+co,'url(#hatch2)','DURING · line stop');
+  band(c.t,c.t+co,'url(#hatch2)','DURING · changeover');
   band(c.t+co,isFinite(I.removed)?I.removed:c.t+co,'var(--surface-2)','AFTER · removal');
   const step=(tB-tA)>240?30:(tB-tA)>120?15:10;
   for(let g=Math.ceil(tA/step)*step;g<=tB;g+=step){s+=`<line x1="${X(g)}" x2="${X(g)}" y1="${top-2}" y2="${H-22}" stroke="var(--grid)"/><text x="${X(g)}" y="${H-8}" font-size="10" text-anchor="middle" class="mut mono">${fmtHM(g)}</text>`;}
@@ -824,7 +824,7 @@ function renderCODetail(res){
   svg.innerHTML=s;
   const n=c.changed.length,trips=new Set(I.rq.map(r=>r.dispatched+'|'+r.amr)).size;
   $('#co-summary').innerHTML=`<b>Before:</b> ${n} pre-stage requests from ${I.first!=null?fmtHM(I.first):'—'} (${I.first!=null?f0(c.t-I.first):'—'} min ahead), ${trips} AMR trips; ${I.staged} štaple go straight to the free reserve slot, ${I.rq.length-I.staged} to changeover positions. Last new štapel in place ${I.lastNew!=null&&isFinite(I.lastNew)?fmtHM(I.lastNew):'—'}, <b>${I.reserve!=null?f0(I.reserve):'—'} min</b> before the stop. `+
-   `<b>During:</b> line stops ${fmtHM(c.t)}–${fmtHM(c.t+co)}; operator swaps ${n} points, ${I.ret.length} old štaple move to return positions. `+
+   `<b>During:</b> changeover window 22:58–23:18 ${fmtHM(c.t)}–${fmtHM(c.t+co)}; operator swaps ${n} points, ${I.ret.length} old štaple move to return positions. `+
    `<b>After:</b> removal finished ${I.removed!=null&&isFinite(I.removed)?fmtHM(I.removed):'—'}, riding back on the delivery trips of the next replenishments. Yellow bar = request open, dark overlay = AMR on the way, grey = old štapel waiting for pick-up and on the way back.`;
   const ev=[];
   for(const r of I.rq){ev.push([r.created,'Pre-stage request',r,'—']);if(r.dispatched!=null)ev.push([r.dispatched,'AMR leaves existing SM',r,'AMR '+r.amr]);if(r.delivered!=null)ev.push([r.delivered,'Delivered → '+(r.placed||''),r,'AMR '+r.amr]);}
@@ -907,7 +907,7 @@ function renderAssume(){
   const items=[
    `<b>Bill of materials.</b> From the Prevodník sheet: ${COMPS.length} components (${COMPS.map(c=>c.id).join(', ')}), 1 piece each per transmission. G1 and G2/Rev have stock in the existing supermarket but no column in Prevodník, so they are not supplied to Line 2 here. Confirm with the organisers.`,
    `<b>Shift model.</b> Taken from the plan: D = day shift from ${pad(P.dayStart)}:00, N = night shift from ${pad(P.dayStart+12)}:00, D+N = both (Thursday is night only). 55 JPH net while running, 30 min break in the middle of each 12 h shift.`,
-   `<b>Changeover.</b> 20 min line stop whenever the transmission type changes (packaging changes do not count). G&amp;S material is swapped at the start of the window; a changeover at the start of a production day happens before the shift starts.`,
+   `<b>Changeover.</b> 20 min changeover window (model parameter) whenever (packaging changes do not count). G&amp;S material is swapped at the start of the window; a changeover at the start of a production day happens before the shift starts.`,
    `<b>Inverter run (INV D3.6).</b> Uses no G&amp;S material; consumption points keep the previous material.`,
    `<b>AMR.</b> ${P.speed} km/h, ${P.dist} m one way, ${P.handling} min per load or unload stop, max 2 štaple. A request can leave only after ${P.prep} min of preparation in the existing supermarket. Full štaple go to the line; empties and partial štaple ride back on the return leg. One cycle = ${f1(D.cycle)} min.`,
    `<b>Lead time for triggers.</b> LT_plan = nominal delivery (${f1(D.ltNom)} min incl. preparation) + one full AMR cycle of waiting = ${f1(D.ltPlan)} min. Safety stock covers ${P.service} % with lead-time CV ${P.ltCv}. Known changes (speed, distance, handling, fleet, known delay) flow into the trigger automatically; the "AMR delay, unplanned" scenario is deliberately not known to it.`,
